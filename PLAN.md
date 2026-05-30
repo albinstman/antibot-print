@@ -59,10 +59,11 @@ patterns; each pattern already includes its `S:`/`H:`/`B:` context prefix:
 
 ```json
 {
-  "vendor": "datadome",
+  "vendor": "<vendor-slug>",
   "signals": [
-    "H:set-cookie:\\s*datadome=",
-    "H:server:\\s*DataDome"
+    "H:<header-pattern>",
+    "B:<body-pattern>",
+    "S:<status-pattern>"
   ]
 }
 ```
