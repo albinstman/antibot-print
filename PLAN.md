@@ -142,17 +142,17 @@ README.md                     # created last (see Phase 4)
 
 Agents read **both** local reference sources:
 
-- `references/hypersolutions-docs/` — vendor challenge documentation (Akamai, Incapsula/Imperva, DataDome, Kasada): cookies, headers, status codes, script endpoints.
+- `references/hypersolutions-docs/` — vendor challenge documentation: cookies, headers, status codes, script endpoints.
 - `references/scrapfly-anti-bot-detector/` — a browser-extension detector. Its `detectors/index.json` and per-detector logic catalog vendors and the signals they emit; extract only the parts observable in a static HTTP response.
 
 ## Vendor coverage (Phase 1)
 
-- **Documented in references:** Akamai Bot Manager, DataDome, Incapsula/Imperva, Kasada.
-- **Additional, signals to be derived:** Cloudflare, AWS WAF, F5 (Shape/BIG-IP), PerimeterX/HUMAN, Sucuri, Reblaze, ThreatMetrix, CHEQ.
-- **Captcha (static body/script markers):** hCaptcha, reCAPTCHA, FunCaptcha — included where they leave static markers.
-- **Excluded:** JS-only fingerprint detectors (canvas, webgl, audio, navigator, …).
-
+Cover every vendor for which a genuine static-HTTP signal can be derived from the reference
+sources — antibot/WAF vendors and captcha vendors alike — with no prioritization between them.
 Each vendor keeps only signals that survive in a static HTTP response.
+
+**Excluded:** JS-only fingerprint detectors (canvas, webgl, audio, navigator, …), which are
+unobservable in a static response.
 
 ---
 
