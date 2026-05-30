@@ -1,0 +1,57 @@
+{
+  "id": "detect-f5",
+  "name": "F5 BIG-IP ASM",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "Anti-Bot",
+  "lastUpdated": "2024-01-15",
+  "version": "1.0",
+  "website": "https://www.f5.com/",
+  "icon": "f5_official.png",
+  "description": "F5 BIG-IP Application Security Manager (ASM) - Web application firewall and bot protection",
+  "detection": {
+    "cookie": [
+      {
+        "name": "^TS[a-zA-Z0-9]+$",
+        "nameRegex": true,
+        "confidence": 100,
+        "description": "F5 BIG-IP session persistence cookies",
+        "nameWholeWord": false,
+        "nameCaseSensitive": false,
+        "value": "",
+        "valueRegex": false,
+        "valueWholeWord": false,
+        "valueCaseSensitive": false,
+        "nameScope": "all",
+        "valueScope": "all"
+      },
+      {
+        "name": "^BIGipServer.*",
+        "nameRegex": true,
+        "confidence": 60,
+        "description": "F5 BIG-IP load balancer cookies",
+        "nameWholeWord": false,
+        "nameCaseSensitive": false,
+        "value": "",
+        "valueRegex": false,
+        "valueWholeWord": false,
+        "valueCaseSensitive": false,
+        "nameScope": "all",
+        "valueScope": "all"
+      }
+    ],
+    "header": [],
+    "url": [],
+    "content": [],
+    "dom": [],
+    "window": []
+  },
+  "notes": {
+    "detection_tips": [
+      "TS* cookies are commonly used for session persistence",
+      "BIGipServer* cookies indicate load balancing",
+      "F5 ASM often modifies response headers",
+      "Look for encoded values in cookies starting with 'TS'"
+    ]
+  }
+}

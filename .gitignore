@@ -1,6 +1,4 @@
-# Reference material — local-only, third-party, not part of antibot-print
-# (kept out of the public repo)
-references/
+
 
 # Local tooling
 .claude/

@@ -1,0 +1,48 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "icons/icon128.png",
+         "16": "icons/icon16.png",
+         "32": "icons/icon32.png",
+         "48": "icons/icon48.png"
+      },
+      "default_popup": "popup.html",
+      "default_title": "Scrapfly: anti-bot detector"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "js": [ "modules/detection/hooks/window-condition-language.js", "modules/detection/hooks/hook-resilience-manager.js", "modules/detection/hooks/window-property-tracker.js", "content-main-world.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start",
+      "world": "MAIN"
+   }, {
+      "all_frames": false,
+      "js": [ "modules/core/logger.js", "utils/format-utils.js", "utils/url-utils.js", "utils/detection-utils.js", "utils/utils.js", "utils/pattern-cache.js", "modules/core/storage-manager.js", "modules/detection/managers/confidence-manager.js", "modules/detection/engine/detection-engine-analysis.js", "modules/detection/engine/detection-engine-extractors.js", "modules/detection/engine/detection-engine-matching.js", "modules/detection/engine/detection-engine-hooks.js", "modules/detection/engine/detection-engine-manager.js", "sections/settings/settings-runtime.js", "content.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Detect CAPTCHAs, anti-bot systems and fingerprinting technologies on websites",
+   "host_permissions": [ "http://*/*", "https://*/*" ],
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwnqOwiWRKCc/4sjGMUblsVVIi4CPBifNb6nvwXGi1yw/ArZZOWEKD6M/Jgk8JIZ7Avg9RyS4cz28cfKmQo+0+xwrc4e4Z6+jYrhP2ZLLElHNRG6CtiCoctHKlU1OmSsnEDLASaSqEBOYhnYM79U40snkm1QKjb6MYJq0VmuEH+RsON6r9h61gPUn1Nm+jQaMVuLXMROlWxkVqFwxYcl5uOgWpmmjOuvZuQZw0PFCrb+mF66K0TEiurE2+XKTFWkMQjJZ8HKoACVVUvaS6/SonRTp6lAyJQOsmG60qHuQmDoDXxhUiauGDfLZRRUe3eDsZ/03mqyTmnXw+LOfdnMFbwIDAQAB",
+   "manifest_version": 3,
+   "name": "Scrapfly: anti-bot detector",
+   "permissions": [ "storage", "activeTab", "scripting", "tabs", "webNavigation", "webRequest", "cookies", "notifications", "downloads", "alarms" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.5",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "modules/styles/notification-manager.css", "detectors/*/*", "sections/settings/default-settings.json" ]
+   } ]
+}

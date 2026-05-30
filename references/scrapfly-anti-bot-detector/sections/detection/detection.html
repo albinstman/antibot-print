@@ -1,0 +1,261 @@
+<!-- Detection Tab Template -->
+  <div id="loadingState" class="loading-state" style="display: flex;">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <svg class="spinner-svg" viewBox="0 0 50 50">
+          <circle class="spinner-circle" cx="25" cy="25" r="20"></circle>
+        </svg>
+      </div>
+      <h2 class="loading-text">Analyzing Page</h2>
+    </div>
+  </div>
+
+  <div id="blacklistWarning" class="blacklist-warning-state" style="display: none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" opacity="0.7">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+      <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <h3>Detection disabled for this domain</h3>
+    <p id="blacklistDomain" class="blacklist-domain-text"></p>
+    <button id="removeFromBlacklistBtn" class="remove-blacklist-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+      </svg>
+      Remove from Blacklist
+    </button>
+    <p class="blacklist-hint">Or go to Settings → Detection → Blacklisted Domains to manage.</p>
+  </div>
+
+  <div id="emptyState" class="empty-state empty-state--centered" style="display: none;">
+    <div class="state-card state-card--blue">
+      <div class="state-card-icon">
+        <img src="icons/icon48.png" alt="Scrapfly" width="48" height="48" class="state-card-logo">
+      </div>
+      <h3 class="state-card-title">Nothing Detected</h3>
+      <p class="state-card-description">This page is clean / cache was cleared or requires reload.</p>
+      <div class="state-card-badges">
+        <span class="state-card-badge">✓ No CAPTCHAs</span>
+        <span class="state-card-badge">✓ No Anti-Bot</span>
+        <span class="state-card-badge">✓ No Fingerprinting</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="detectionResults" class="detection-results" style="display: none;">
+    <div id="detectionOverview" class="detection-overview" style="display: none;">
+      <div class="url-display-line">
+        <div class="url-display-container">
+          <img id="siteFavicon" class="site-favicon" src="" alt="">
+          <span id="siteUrl" class="site-url" title=""></span>
+        </div>
+        <div class="url-action-buttons">
+          <button id="clearCacheBtn" class="url-action-btn clear-cache-btn" title="Clear Cache">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"/>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+            </svg>
+          </button>
+          <button id="copyOverviewBtn" class="url-action-btn copy-overview-btn" title="Copy overview">
+            <svg width="14" height="14" viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button id="addToBlacklistBtn" class="url-action-btn blacklist-btn" title="Block this domain">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M4.93 4.93l14.14 14.14"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="stats-line">
+        <div class="stat-inline detections-count" title="Detections">
+          <div class="stat-icon-inline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10" opacity="0.3"/>
+              <circle cx="12" cy="12" r="6" opacity="0.5"/>
+              <circle cx="12" cy="12" r="2"/>
+              <path d="M12 2v4M12 18v4"/>
+            </svg>
+          </div>
+          <div class="stat-content-inline">
+            <div class="stat-label-inline">DETECTIONS</div>
+            <div class="stat-value-inline" id="detectionsCount">0</div>
+          </div>
+        </div>
+
+        <div class="stat-inline overall-confidence" title="Confidence">
+          <div class="stat-icon-inline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 2a10 10 0 0 1 10 10" opacity="0.3"/>
+              <path d="M12 2a10 10 0 0 0-10 10" opacity="0.3"/>
+              <path d="M4.93 4.93l4.24 4.24"/>
+              <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="stat-content-inline">
+            <div class="stat-label-inline">CONFIDENCE</div>
+            <div class="stat-value-inline" id="overallConfidence">0%</div>
+          </div>
+        </div>
+
+        <div class="stat-inline difficulty-level" title="Difficulty">
+          <div class="stat-icon-inline" id="difficultyIcon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="stat-content-inline">
+            <div class="stat-label-inline">DIFFICULTY</div>
+            <div class="stat-value-inline" id="difficultyLevel">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cache-expiry-line">
+        <div class="stat-inline cache-scope-stat" title="Cache Scope">
+          <div class="stat-icon-inline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20" opacity="0.5"/>
+              <path d="M12 2a15 15 0 0 1 0 20" opacity="0.7"/>
+              <path d="M12 2a15 15 0 0 0 0 20" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="stat-content-inline">
+            <div class="stat-label-inline">CACHE SCOPE</div>
+            <div class="stat-value-inline" id="cacheScopeDisplay">Domain</div>
+          </div>
+        </div>
+        <div class="stat-inline cache-expiry-stat" title="Cache Expiration">
+          <div class="stat-icon-inline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="stat-content-inline">
+            <div class="stat-label-inline">CACHE EXPIRATION</div>
+            <div class="stat-value-inline" id="cacheExpiry">-</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="detectionSearch" class="search-input" placeholder="Search detections...">
+    </div>
+
+    <div id="resultsList" class="results-list"></div>
+
+    <div id="detectionPagination" class="pagination">
+      <div class="pagination-info">Showing 1-10 of 0</div>
+      <div class="pagination-controls">
+        <button class="pagination-btn pagination-btn-prev" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="page-info">
+          <span>Page</span>
+          <input type="text" class="page-input" value="1" />
+          <span>of</span>
+          <span class="total-pages">1</span>
+        </div>
+        <button class="pagination-btn pagination-btn-next" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="disabledState" class="empty-state empty-state--centered" style="display: none;">
+    <div class="state-card state-card--orange">
+      <div class="state-card-icon">
+        <img src="icons/icon48.png" alt="Scrapfly" width="48" height="48" class="state-card-logo">
+      </div>
+      <h3 class="state-card-title">Detection Disabled</h3>
+      <p class="state-card-description">Security detection is currently turned off.</p>
+      <p class="state-card-action">Toggle the switch at the top to enable detection.</p>
+      <button id="disabledBlacklistBtn" class="state-card-blacklist-btn" title="This domain is blacklisted">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12,2C17.5,2 22,6.5 22,12C22,17.5 17.5,22 12,22C6.5,22 2,17.5 2,12C2,6.5 6.5,2 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M16.95,5.63L18.37,7.05L7.05,18.37L5.63,16.95L16.95,5.63Z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="interruptedState" class="empty-state empty-state--centered" style="display: none;">
+    <div class="state-card state-card--red">
+      <div class="state-card-icon">
+        <img src="icons/icon48.png" alt="Scrapfly" width="48" height="48" class="state-card-logo">
+      </div>
+      <h3 class="state-card-title">Detection Interrupted</h3>
+      <p class="state-card-description">Detection was incomplete because you switched tabs.</p>
+      <p class="state-card-action">Please reload the page to run a fresh detection.</p>
+    </div>
+  </div>
+
+  <!-- Detection Detail Modal -->
+  <div id="detectionDetailModal" class="detection-modal">
+    <div class="detection-modal-overlay"></div>
+    <div class="detection-modal-container">
+      <div class="detection-modal-header">
+        <div class="detection-modal-title-group">
+          <div class="detection-modal-icon" id="detectionModalIcon"></div>
+          <div class="detection-modal-title-info">
+            <h3 id="detectionModalName">Detection Name</h3>
+            <div id="detectionModalCategories" class="detection-modal-categories"></div>
+          </div>
+        </div>
+        <button id="closeDetectionModal" class="detection-modal-close" title="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+      <div class="detection-modal-content">
+        <div class="detection-modal-meta">
+          <div class="detection-modal-meta-item">
+            <span class="meta-label">Confidence</span>
+            <span id="detectionModalConfidence" class="meta-value">0%</span>
+          </div>
+          <div class="detection-modal-meta-item">
+            <span class="meta-label">Difficulty</span>
+            <span id="detectionModalDifficulty" class="meta-value">Low</span>
+          </div>
+          <div class="detection-modal-meta-item">
+            <span class="meta-label">Matches Found</span>
+            <span id="detectionModalDetections" class="meta-value">0</span>
+          </div>
+          <div class="detection-modal-meta-item">
+            <span class="meta-label">
+              <i class="fas fa-user"></i> Author
+            </span>
+            <span id="detectionModalAuthor" class="meta-value">Unknown</span>
+          </div>
+        </div>
+        <div class="detection-modal-section">
+          <div class="detection-modal-section-header">
+            <h4>Description</h4>
+          </div>
+          <p id="detectionModalDescription" class="detection-modal-description">No description available.</p>
+        </div>
+        <div class="detection-modal-section detection-modal-section--methods">
+          <div class="detection-modal-section-header">
+            <h4>Detection Methods</h4>
+          </div>
+          <div id="detectionModalMethods" class="detection-modal-methods-list">
+            <span class="badge">No methods detected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

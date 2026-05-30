@@ -1,0 +1,78 @@
+{
+"version": "1.0.0",
+"antibot": {
+    "colour": "#FF5733",
+    "detectors":[
+        "detect-akamai",
+        "detect-cloudflare",
+        "detect-aws-waf",
+        "detect-botguard",
+        "detect-f5",
+        "detect-datadome",
+        "detect-incapsula",
+        "detect-perimeterx",
+        "detect-shapesecurity",
+        "detect-sucuri",
+        "detect-reblaze",
+        "detect-threatmetrix",
+        "detect-meetrics",
+        "detect-ocule",
+        "detect-cheq",
+        "detect-kasada"
+    ]
+},
+"captcha": {
+    "colour": "#33C3FF",
+    "detectors":[
+        "detect-hcaptcha",
+        "detect-recaptcha",
+        "detect-geetest",
+        "detect-qcloud",
+        "detect-funcaptcha",
+        "detect-aliexpress",
+        "detect-friendlycaptcha",
+        "detect-captchaeu"
+    ]
+},
+"fingerprint": {
+    "colour": "#3b82f6",
+    "detectors":[
+        "detect-audio-fingerprint",
+        "detect-battery-fingerprint",
+        "detect-canvas-fingerprint",
+        "detect-clipboard-fingerprint",
+        "detect-crypto-fingerprint",
+        "detect-css-fingerprint",
+        "detect-font-fingerprint",
+        "detect-gamepads-fingerprint",
+        "detect-geolocation-fingerprint",
+        "detect-hardware-fingerprint",
+        "detect-indexeddb-fingerprint",
+        "detect-media-fingerprint",
+        "detect-navigator-fingerprint",
+        "detect-orientation-fingerprint",
+        "detect-performance-fingerprint",
+        "detect-screen-fingerprint",
+        "detect-storage-fingerprint",
+        "detect-timezone-fingerprint",
+        "detect-usb-fingerprint",
+        "detect-webgl-fingerprint",
+        "detect-webrtc-fingerprint"
+    ]
+},
+"tags":{
+    "dom": {"colour": "#3b82f6"},
+    "header": {"colour": "#FF33A8"},
+    "cookie": {"colour": "#FFC133"},
+    "content": {"colour": "#33FFF3"},
+    "url": {"colour": "#00BCD4"},
+    "js_hooks": {"colour": "#00E5FF"},
+    "window": {"colour": "#4CAF50"},
+    "payload": {"colour": "#9C27B0"}
+},
+"badge": {
+    "low": {"colour": "#4CAF50"},
+    "medium": {"colour": "#FFA500"},
+    "high": {"colour": "#FF4444"}
+}
+}

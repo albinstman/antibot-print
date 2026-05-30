@@ -1,0 +1,96 @@
+{
+  "id": "detect-geetest",
+  "name": "GeeTest",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "CAPTCHA",
+  "lastUpdated": "2024-01-15",
+  "version": "1.0",
+  "website": "https://www.geetest.com/",
+  "icon": "geetest_official.png",
+  "description": "AI-powered behavioral CAPTCHA with slide verification",
+  "detection": {
+    "cookie": [
+      
+    ],
+    "header": [
+     
+    ],
+    "url": [
+      {
+        "confidence": 100,
+        "description": "GeeTest API endpoint",
+        "text": "api.geetest.com",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 100,
+        "description": "GeeTest static resources",
+        "text": "static.geetest.com",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 100,
+        "description": "GeeTest type endpoint",
+        "text": "/gettype.php",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 50,
+        "description": "GeeTest challenge endpoint",
+        "text": "/get.php",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      }
+      
+    ],
+    "content": [
+      {
+        "confidence": 50,
+        "description": "GeeTest initialization function",
+        "text": "window.initGeetest",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "text": "geetest",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "text": "getGeetest",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "text": "geetestUtils",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      }
+    ],
+    "dom": [
+     
+    ],
+    "window": [
+
+    ]
+  }
+}

@@ -1,0 +1,1501 @@
+<!-- Rules Tab Template -->
+  <div class="rules-header">
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button id="checkUpdatesBtn" class="check-updates-btn" title="Check for detector updates">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="update-icon">
+          <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+        </svg>
+        <span id="checkUpdatesBtnText">Update</span>
+        <span id="updatesBadge" class="updates-badge" style="display: none;">0</span>
+      </button>
+      <button id="importRulesBtn" class="import-btn-small" title="Import">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,11L16,15H13.5V18H10.5V15H8L12,11Z"/>
+        </svg>
+        Import
+      </button>
+      <input type="file" id="importRulesFile" accept=".json" style="display: none;">
+      <button id="exportRulesBtn" class="export-btn-small" title="Export">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/>
+        </svg>
+        Export
+      </button>
+      <button id="clearRulesBtn" class="clear-btn-small" title="Clear All Rules">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+        </svg>
+        Clear
+      </button>
+      <button id="addDetectorBtn" class="add-btn" title="Add New Detector">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+        </svg>
+        Add
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" id="rulesSearch" class="search-input" placeholder="Search detectors...">
+    </div>
+  </div>
+
+  <div id="rulesList" class="rules-list"></div>
+
+  <div id="rulesPagination" class="pagination" style="display: none;">
+    <div class="pagination-info">No items to display</div>
+    <div class="pagination-controls">
+      <button class="pagination-btn pagination-btn-prev" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12Z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="page-info">
+        <span>Page</span>
+        <input type="text" class="page-input" value="1" />
+        <span>of</span>
+        <span class="total-pages">1</span>
+      </div>
+      <button class="pagination-btn pagination-btn-next" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12Z" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="detectorsEmpty" class="empty-state" style="display: none;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" opacity="0.5">
+      <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.98C19.47,12.66 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.97 19.05,5.05L16.56,6.05C16.04,5.65 15.48,5.32 14.87,5.07L14.49,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.51,2.42L9.13,5.07C8.52,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.72,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.52,18.68 9.13,18.93L9.51,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.49,21.58L14.87,18.93C15.48,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.28,19.04 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.98Z" stroke="currentColor" stroke-width="2" fill="none"/>
+    </svg>
+    <h3>No detectors loaded</h3>
+    <p>Detectors will appear here once loaded from storage and files.</p>
+  </div>
+
+  <!-- Edit Rule Modal -->
+  <div id="editRuleModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content">
+      <div class="rule-modal-header">
+        <span id="editRuleModalAction" class="rule-modal-action">Edit</span>
+        <button id="closeRuleModal" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Detector Information Card -->
+        <div class="modal-card">
+          <div class="modal-card-header">
+            <h3>Detector Information</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" id="detectorNameInput" class="form-input" placeholder="Detector name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select id="detectorCategorySelect" class="form-select">
+                  <option value="antibot">Anti-Bot</option>
+                  <option value="captcha">CAPTCHA</option>
+                  <option value="fingerprint">Fingerprint</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Icon</label>
+                <div class="icon-selector-row">
+                  <div class="icon-preview">
+                    <img id="currentDetectorIcon" src="" alt="Icon">
+                  </div>
+                  <button type="button" class="change-icon-btn">Change</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Author</label>
+                <input type="text" id="detectorAuthorInput" class="form-input" placeholder="scrapfly" maxlength="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badge Color Card -->
+        <div class="modal-card">
+          <div class="modal-card-header">
+            <h3>Badge Color</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="color-picker-card">
+              <div class="color-picker-grid">
+                <div class="color-option" style="background: #3b82f6;" data-color="#3b82f6"></div>
+                <div class="color-option" style="background: #10b981;" data-color="#10b981"></div>
+                <div class="color-option" style="background: #ef4444;" data-color="#ef4444"></div>
+                <div class="color-option" style="background: #f59e0b;" data-color="#f59e0b"></div>
+                <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+                <div class="color-option" style="background: #ec4899;" data-color="#ec4899"></div>
+                <div class="color-option" style="background: #eab308;" data-color="#eab308"></div>
+                <div class="color-option rainbow-picker" id="rainbowPicker" title="Custom Color">
+                  <span class="custom-color-hex"></span>
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <defs>
+                      <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff0000"/>
+                        <stop offset="16.66%" style="stop-color:#ff8800"/>
+                        <stop offset="33.33%" style="stop-color:#ffff00"/>
+                        <stop offset="50%" style="stop-color:#00ff00"/>
+                        <stop offset="66.66%" style="stop-color:#0088ff"/>
+                        <stop offset="83.33%" style="stop-color:#8800ff"/>
+                        <stop offset="100%" style="stop-color:#ff00ff"/>
+                      </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="4" fill="url(#rainbow)"/>
+                    <path d="M12,17.5L8,14L10,9L12,11L14,9L16,14L12,17.5Z" fill="white" opacity="0.8"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detection Methods Card -->
+        <div class="modal-card">
+          <div class="modal-card-header">
+            <h3>Detection Methods</h3>
+          </div>
+          <div class="modal-card-body modal-card-body-methods">
+            <div id="detectionMethodsContainer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="cancelRuleEdit" class="rule-btn rule-btn-cancel">Cancel</button>
+        <button id="saveRuleEdit" class="rule-btn rule-btn-save">Save Rule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Color Picker Modal -->
+  <div id="advancedColorModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content canvas-color-modal">
+      <div class="rule-modal-body">
+        <div class="canvas-color-picker">
+          <div class="color-picker-canvas">
+            <canvas id="colorCanvas" width="180" height="120"></canvas>
+            <div id="colorPickerCursor" class="color-picker-cursor"></div>
+          </div>
+
+          <div class="hue-strip">
+            <canvas id="hueCanvas" width="20" height="120"></canvas>
+            <div id="hueSliderCursor" class="hue-slider-cursor"></div>
+          </div>
+
+          <div class="color-controls">
+            <div class="selected-color-display">
+              <div id="selectedColorPreview" class="selected-color-preview"></div>
+            </div>
+
+            <div class="rgb-controls">
+              <div class="rgb-input-group">
+                <label>R</label>
+                <input type="number" id="rInput" min="0" max="255" class="rgb-input">
+              </div>
+              <div class="rgb-input-group">
+                <label>G</label>
+                <input type="number" id="gInput" min="0" max="255" class="rgb-input">
+              </div>
+              <div class="rgb-input-group">
+                <label>B</label>
+                <input type="number" id="bInput" min="0" max="255" class="rgb-input">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rule-modal-footer">
+        <button id="cancelAdvancedColor" class="rule-btn rule-btn-cancel">Cancel</button>
+        <button id="selectAdvancedColor" class="rule-btn rule-btn-save">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method Settings Modal -->
+  <div id="methodSettingsModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content method-settings-modal">
+      <div class="rule-modal-header">
+        <h2>Detection Method Settings</h2>
+        <button id="closeMethodSettings" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Confidence Level Card -->
+        <div class="modal-card" id="confidenceGroup">
+          <div class="modal-card-header">
+            <span class="card-icon icon-gauge">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z"/>
+              </svg>
+            </span>
+            <h3>Confidence Level</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="confidence-display">
+              <span class="confidence-label">Detection confidence:</span>
+              <span id="confidenceValue" class="confidence-value">100</span>
+              <span class="confidence-percent">%</span>
+            </div>
+            <div class="confidence-slider-container">
+              <input type="range" id="confidenceSlider" class="confidence-slider" min="0" max="100" value="100">
+              <div class="confidence-marks">
+                <span>0</span>
+                <span>25</span>
+                <span>50</span>
+                <span>75</span>
+                <span>100</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Search Scope Card (for CONTENT detection only) -->
+        <div class="modal-card" id="contentScopeGroup">
+          <div class="modal-card-header">
+            <span class="card-icon icon-filter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3,17V19H9V17H3M3,5V7H13V5H3M13,21V19H21V17H13V15H11V21H13M7,9V11H3V13H7V15H9V9H7M21,13V11H11V13H21M15,9H17V7H21V5H17V3H15V9Z"/>
+              </svg>
+            </span>
+            <h3>Content Search Scope</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="settings-options">
+              <div class="setting-option">
+                <div class="option-content">
+                  <span class="setting-label">Only check scripts</span>
+                  <p class="option-hint">Restrict search to JavaScript code and script URLs only</p>
+                </div>
+                <label class="toggle-switch" for="checkScripts">
+                  <input type="checkbox" id="checkScripts" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header/Cookie Scope Settings Card (for HEADER and COOKIE detection only) -->
+        <div class="modal-card" id="headerCookieScopeGroup">
+          <div class="modal-card-header">
+            <span class="card-icon icon-filter">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3,17V19H9V17H3M3,5V7H13V5H3M13,21V19H21V17H13V15H11V21H13M7,9V11H3V13H7V15H9V9H7M21,13V11H11V13H21M15,9H17V7H21V5H17V3H15V9Z"/>
+              </svg>
+            </span>
+            <h3 id="scopeGroupTitle">Scope Settings</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="settings-options">
+              <div class="setting-option">
+                <div class="option-content">
+                  <span class="setting-label" id="nameScopeLabel">Name Scope</span>
+                  <p class="option-hint">Where to check for name/field matches</p>
+                </div>
+                <select id="nameScope" class="scope-select">
+                  <option value="request">Request</option>
+                  <option value="response">Response</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+              <div class="setting-option" id="valueScopeRow">
+                <div class="option-content">
+                  <span class="setting-label">Value Scope</span>
+                  <p class="option-hint">Where to check for value matches</p>
+                </div>
+                <select id="valueScope" class="scope-select">
+                  <option value="request">Request</option>
+                  <option value="response">Response</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- URL Scope Settings Card (for URL detection only) -->
+        <div class="modal-card" id="urlScopeGroup">
+          <div class="modal-card-header">
+            <span class="card-icon icon-globe">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+            </span>
+            <h3>URL Scope Settings</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="settings-options">
+              <div class="setting-option">
+                <div class="option-content">
+                  <span class="setting-label">URL Scope</span>
+                  <p class="option-hint">Page = current URL | Scripts = page + scripts | All = all requests</p>
+                </div>
+                <select id="textScope" class="scope-select">
+                  <option value="page_only">Page</option>
+                  <option value="page_and_scripts">Scripts</option>
+                  <option value="all">All (default)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payload Request Constraints Card (for PAYLOAD detection only) -->
+        <div class="modal-card" id="payloadScopeGroup" style="display: none;">
+          <div class="modal-card-header">
+            <span class="card-icon icon-target">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"/>
+              </svg>
+            </span>
+            <h3>Request Constraints</h3>
+          </div>
+          <div class="modal-card-body">
+          <div class="settings-options">
+            <!-- URL Pattern Field -->
+            <div class="setting-option payload-url-pattern-option">
+              <div class="option-content">
+                <span class="setting-label">URL Pattern (optional)</span>
+                <div class="option-examples">
+                  Leave empty to match any URL
+                </div>
+              </div>
+            </div>
+            <input
+              type="text"
+              id="payloadUrlPattern"
+              class="method-input payload-url-input"
+              placeholder="/api/verify or challenge.php"
+            >
+
+            <!-- URL Regex Toggle -->
+            <div class="setting-option">
+              <div class="option-content">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="setting-label">URL Regular Expression (Regex)</span>
+                  <button id="payloadUrlRegexHelperBtn" class="regex-helper-btn" title="URL Regex Helper">?</button>
+                  <button id="payloadUrlRegexExplanationBtn" class="explanation-helper-btn" title="What is Regex?">ℹ</button>
+                </div>
+                <div class="option-examples">
+                  <span class="example-match">✓ Matches:</span> /api/(verify|check)
+                  <span class="example-separator">|</span>
+                  <span class="example-nomatch">✗ Won't:</span> literal text only
+                </div>
+              </div>
+              <label class="toggle-switch" for="payloadUrlRegex">
+                <input type="checkbox" id="payloadUrlRegex" class="toggle-input">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- URL Case Sensitive Toggle -->
+            <div class="setting-option">
+              <div class="option-content">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="setting-label">URL Case Sensitive</span>
+                  <button id="payloadUrlCaseHelperBtn" class="pattern-helper-btn" title="Case Sensitive Helper">?</button>
+                  <button id="payloadUrlCaseExplanationBtn" class="explanation-helper-btn" title="What is Case Sensitive?">ℹ</button>
+                </div>
+                <div class="option-examples">
+                  <span class="example-match">✓ Matches:</span> /API/Verify (exact case)
+                  <span class="example-separator">|</span>
+                  <span class="example-nomatch">✗ Won't:</span> /api/verify
+                </div>
+              </div>
+              <label class="toggle-switch" for="payloadUrlCaseSensitive">
+                <input type="checkbox" id="payloadUrlCaseSensitive" class="toggle-input">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- HTTP Methods Radio Buttons -->
+            <div class="setting-option payload-http-method-option">
+              <div class="option-content" style="margin-bottom: 12px;">
+                <span class="setting-label">HTTP Method (select one)</span>
+                <div class="option-examples">Filter by request method (optional)</div>
+              </div>
+              <div class="http-method-badges-grid">
+                <!-- GET -->
+                <label class="http-method-badge" data-method="GET">
+                  <input type="radio" name="payloadMethod" id="payloadMethodGet" value="GET">
+                  <span class="method-badge-content">
+                    <span class="method-text">GET</span>
+                  </span>
+                </label>
+                <!-- POST -->
+                <label class="http-method-badge" data-method="POST">
+                  <input type="radio" name="payloadMethod" id="payloadMethodPost" value="POST">
+                  <span class="method-badge-content">
+                    <span class="method-text">POST</span>
+                  </span>
+                </label>
+                <!-- PUT -->
+                <label class="http-method-badge" data-method="PUT">
+                  <input type="radio" name="payloadMethod" id="payloadMethodPut" value="PUT">
+                  <span class="method-badge-content">
+                    <span class="method-text">PUT</span>
+                  </span>
+                </label>
+                <!-- PATCH -->
+                <label class="http-method-badge" data-method="PATCH">
+                  <input type="radio" name="payloadMethod" id="payloadMethodPatch" value="PATCH">
+                  <span class="method-badge-content">
+                    <span class="method-text">PATCH</span>
+                  </span>
+                </label>
+                <!-- DELETE -->
+                <label class="http-method-badge" data-method="DELETE">
+                  <input type="radio" name="payloadMethod" id="payloadMethodDelete" value="DELETE">
+                  <span class="method-badge-content">
+                    <span class="method-text">DELETE</span>
+                  </span>
+                </label>
+                <!-- Custom -->
+                <label class="http-method-badge" data-method="CUSTOM">
+                  <input type="radio" name="payloadMethod" id="payloadMethodCustom" value="CUSTOM">
+                  <span class="method-badge-content">
+                    <span class="method-text">Custom</span>
+                  </span>
+                </label>
+              </div>
+              <!-- Custom Method Input -->
+              <div id="customMethodInputContainer" style="display: none; margin-top: 10px;">
+                <input type="text" id="customMethodInput" placeholder="Enter custom method (e.g., OPTIONS, HEAD)"
+                  style="width: 100%; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 13px;">
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <!-- Pattern Matching Settings Card (Name Field) -->
+        <div class="modal-card" id="nameFieldOptionsGroup">
+          <div class="modal-card-header">
+            <span class="card-icon icon-settings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+              </svg>
+            </span>
+            <h3 id="patternOptionsTitle">Pattern Matching Options</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="settings-options">
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Regular Expression (Regex)</span>
+                    <button id="regexHelperBtn" class="regex-helper-btn" title="Regex Pattern Helper">?</button>
+                    <button id="regexExplanationBtn" class="explanation-helper-btn" title="What is Regex?">ℹ</button>
+                  </div>
+                  <div class="option-examples" id="nameRegexExamples">
+                    <span class="example-match">✓ Matches:</span> _ab.*, _abck$, ^bm_
+                    <span class="example-separator">|</span>
+                    <span class="example-nomatch">✗ Won't match:</span> literal text only
+                  </div>
+                </div>
+                <label class="toggle-switch" for="nameRegex">
+                  <input type="checkbox" id="nameRegex" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Whole Word</span>
+                    <button id="wholeWordHelperBtn" class="pattern-helper-btn" title="Whole Word Helper">?</button>
+                    <button id="wholeWordExplanationBtn" class="explanation-helper-btn" title="What is Whole Word?">ℹ</button>
+                  </div>
+                  <div class="option-examples" id="nameWholeWordExamples">
+                    <span class="example-match">✓ Matches:</span> _abck (alone)
+                    <span class="example-separator">|</span>
+                    <span class="example-nomatch">✗ Won't match:</span> test_abck, _abckTest
+                  </div>
+                </div>
+                <label class="toggle-switch" for="nameWholeWord">
+                  <input type="checkbox" id="nameWholeWord" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Case Sensitive</span>
+                    <button id="caseSensitiveHelperBtn" class="pattern-helper-btn" title="Case Sensitive Helper">?</button>
+                    <button id="caseSensitiveExplanationBtn" class="explanation-helper-btn" title="What is Case Sensitive?">ℹ</button>
+                  </div>
+                  <div class="option-examples" id="nameCaseExamples">
+                    <span class="example-match">✓ Matches:</span> Test (exact case)
+                    <span class="example-separator">|</span>
+                    <span class="example-nomatch">✗ Won't match:</span> test, TEST
+                  </div>
+                </div>
+                <label class="toggle-switch" for="nameCaseSensitive">
+                  <input type="checkbox" id="nameCaseSensitive" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Value Field Settings Card (hidden for single-input types) -->
+        <div class="modal-card" id="valueFieldOptionsGroup" style="display: none;">
+          <div class="modal-card-header">
+            <span class="card-icon icon-edit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+              </svg>
+            </span>
+            <h3>Value Field Options</h3>
+          </div>
+          <div class="modal-card-body">
+            <div class="settings-options">
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Regular Expression (Regex)</span>
+                    <button id="regexHelperBtnValue" class="regex-helper-btn" title="Regex Pattern Helper">?</button>
+                    <button id="regexExplanationBtnValue" class="explanation-helper-btn" title="What is Regex?">ℹ</button>
+                  </div>
+                </div>
+                <label class="toggle-switch" for="valueRegex">
+                  <input type="checkbox" id="valueRegex" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Whole Word</span>
+                    <button id="wholeWordHelperBtnValue" class="pattern-helper-btn" title="Whole Word Helper">?</button>
+                    <button id="wholeWordExplanationBtnValue" class="explanation-helper-btn" title="What is Whole Word?">ℹ</button>
+                  </div>
+                </div>
+                <label class="toggle-switch" for="valueWholeWord">
+                  <input type="checkbox" id="valueWholeWord" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-option">
+                <div class="option-content">
+                  <div class="setting-label-row">
+                    <span class="setting-label">Case Sensitive</span>
+                    <button id="caseSensitiveHelperBtnValue" class="pattern-helper-btn" title="Case Sensitive Helper">?</button>
+                    <button id="caseSensitiveExplanationBtnValue" class="explanation-helper-btn" title="What is Case Sensitive?">ℹ</button>
+                  </div>
+                </div>
+                <label class="toggle-switch" for="valueCaseSensitive">
+                  <input type="checkbox" id="valueCaseSensitive" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="cancelMethodSettings" class="rule-btn rule-btn-cancel">Cancel</button>
+        <button id="saveMethodSettings" class="rule-btn rule-btn-save">Apply Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOM Selector Helper Modal -->
+  <div id="domHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2>DOM Selector Helper</h2>
+        <button id="closeDomHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Contextual Tip -->
+        <div class="step-contextual-tip">
+          <svg class="tip-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+          </svg>
+          <div class="tip-content">
+            <strong>Tip:</strong> Type keywords like "recaptcha", "captcha", "cloudflare" for common selectors, or element types like "button", "iframe", "canvas".
+          </div>
+        </div>
+
+        <!-- Step 1: Keyword Input -->
+        <div class="dom-step-content">
+          <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+            What are you looking for?
+          </h4>
+          <input type="text" id="domKeywordInput"
+                 placeholder="Type a keyword (e.g., recaptcha, cloudflare, button, canvas)"
+                 autocomplete="off">
+        </div>
+
+        <!-- Step 2: Suggestions -->
+        <div class="dom-suggestions-section" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            Suggested Selectors
+          </h4>
+          <div id="domSuggestions" class="dom-templates">
+            <div class="suggestions-empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M5,3H19A2,2 0 0,1 21,5V13.03C20.5,12.23 19.81,11.54 19,11V5H5V19H9.5C9.81,19.75 10.26,20.42 10.81,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M7,7H17V9H7V7M7,11H12.03C11.23,11.5 10.54,12.19 10,13H7V11M7,15H9.17C9.06,15.5 9,16 9,16.5V17H7V15Z"/>
+              </svg>
+              <div class="empty-title">Start typing to see suggestions</div>
+              <div class="empty-hint">We'll show common selectors matching your search</div>
+              <div class="empty-examples">
+                Try: <code>recaptcha</code> <code>iframe</code> <code>canvas</code> <code>button</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="cancelDomHelper" class="rule-btn rule-btn-cancel">Cancel</button>
+        <button id="useDomSelector" class="rule-btn rule-btn-save">Use Selector</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Window Properties Helper Modal -->
+  <div id="windowHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content">
+      <div class="rule-modal-header">
+        <h2>Window Properties Helper</h2>
+        <button id="closeWindowHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Step Indicators -->
+        <div class="dom-helper-steps three-steps" data-progress="1">
+          <div class="dom-step active" id="windowStep1">
+            <div class="dom-step-number"><span>1</span></div>
+            <div class="dom-step-label">Enter Keyword</div>
+          </div>
+          <div class="dom-step" id="windowStep2">
+            <div class="dom-step-number"><span>2</span></div>
+            <div class="dom-step-label">Choose Property</div>
+          </div>
+          <div class="dom-step" id="windowStep3">
+            <div class="dom-step-number"><span>3</span></div>
+            <div class="dom-step-label">Select Condition</div>
+          </div>
+        </div>
+
+        <!-- Contextual Tip -->
+        <div class="step-contextual-tip">
+          <svg class="tip-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+          </svg>
+          <div class="tip-content">
+            <strong>Tip:</strong> Type keywords like "chrome", "webkit", "eval", "cdc_" to find common bot-detection properties.
+          </div>
+        </div>
+
+        <!-- Step 1: Keyword Input -->
+        <div class="dom-step-content">
+          <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+            What property are you looking for?
+          </h4>
+          <input type="text" id="windowKeywordInput"
+                 placeholder="Type a keyword (e.g., chrome, webkit, eval, Function)"
+                 autocomplete="off">
+        </div>
+
+        <!-- Step 2: Suggestions -->
+        <div class="dom-suggestions-section" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            Suggested Properties
+          </h4>
+          <div id="windowSuggestions" class="dom-templates">
+            <div class="suggestions-empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+              <div class="empty-title">Start typing to see suggestions</div>
+              <div class="empty-hint">We'll show common window properties matching your search</div>
+              <div class="empty-examples">
+                Try: <code>chrome</code> <code>webkit</code> <code>eval</code> <code>cdc_</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden input to store selected property -->
+        <input type="hidden" id="windowCustomInput" value="">
+
+        <!-- Step 3: Condition Selection -->
+        <div id="windowConditionSection" class="dom-custom-section" style="display: none; margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            Select Condition Type
+          </h4>
+          <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+            Choose how to check the property value:
+          </p>
+          <div class="condition-dropdown" id="conditionDropdownContainer">
+            <button type="button" class="condition-dropdown-trigger" id="conditionDropdownTrigger">
+              <span class="condition-selected-text">Exists</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 8L1 3h10z"/>
+              </svg>
+            </button>
+            <div class="condition-dropdown-menu" id="conditionDropdownMenu">
+              <div class="condition-group">
+                <div class="condition-group-label">Type</div>
+                <div class="condition-option" data-value="typeof object">Object</div>
+                <div class="condition-option" data-value="typeof function">Function</div>
+                <div class="condition-option" data-value="typeof string">String</div>
+                <div class="condition-option" data-value="typeof number">Number</div>
+                <div class="condition-option" data-value="typeof boolean">Boolean</div>
+              </div>
+              <div class="condition-group">
+                <div class="condition-group-label">Existence</div>
+                <div class="condition-option selected" data-value="exists">Exists</div>
+                <div class="condition-option" data-value="truthy">Truthy</div>
+                <div class="condition-option" data-value="falsy">Falsy</div>
+              </div>
+              <div class="condition-group">
+                <div class="condition-group-label">Collections</div>
+                <div class="condition-option" data-value="array">Array</div>
+                <div class="condition-option" data-value="has keys">Has keys</div>
+              </div>
+            </div>
+            <input type="hidden" id="windowConditionSelect" value="exists">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="rule-modal-footer has-back">
+        <div class="footer-left">
+          <button id="backWindowHelper" class="rule-btn rule-btn-back hidden">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Back
+          </button>
+        </div>
+        <div class="footer-right">
+          <button id="cancelWindowHelper" class="rule-btn rule-btn-cancel">Cancel</button>
+          <button id="useWindowProperty" class="rule-btn rule-btn-save">Next: Choose Property</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regex Helper Modal (2-Step) -->
+  <div id="regexHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content">
+      <div class="rule-modal-header">
+        <h2>Regular Expression Helper</h2>
+        <button id="closeRegexHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Step Indicators -->
+        <div class="dom-helper-steps two-steps" data-progress="1">
+          <div class="dom-step active" id="regexStep1">
+            <div class="dom-step-number"><span>1</span></div>
+            <div class="dom-step-label">What do you need?</div>
+          </div>
+          <div class="dom-step" id="regexStep2">
+            <div class="dom-step-number"><span>2</span></div>
+            <div class="dom-step-label">Choose Pattern</div>
+          </div>
+        </div>
+
+        <!-- Contextual Tip -->
+        <div class="step-contextual-tip">
+          <svg class="tip-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+          </svg>
+          <div class="tip-content">
+            <strong>Tip:</strong> Describe what you want to match: "starts with", "ends with", "digits only", "contains word", etc.
+          </div>
+        </div>
+
+        <!-- Step 1: Keyword Input -->
+        <div class="dom-step-content">
+          <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+            What pattern do you need?
+          </h4>
+          <input type="text" id="regexKeywordInput"
+                 placeholder="e.g., starts with, ends with, digits, contains, any text"
+                 autocomplete="off">
+        </div>
+
+        <!-- Step 2: Suggestions -->
+        <div class="dom-suggestions-section" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            Suggested Patterns
+          </h4>
+          <div id="regexSuggestions" class="dom-templates">
+            <div class="suggestions-empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M17,17H7V14L10,11L7,8V5H17V8L14,11L17,14V17Z"/>
+              </svg>
+              <div class="empty-title">Start typing to see suggestions</div>
+              <div class="empty-hint">We'll show regex patterns matching your description</div>
+              <div class="empty-examples">
+                Try: <code>starts with</code> <code>ends with</code> <code>digits</code> <code>url</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <div style="font-weight: 600; font-size: 11px; margin-bottom: 8px; color: var(--text-primary);">Quick Reference:</div>
+          <div style="font-size: 10px; color: var(--text-muted); line-height: 1.6;">
+            <code>.</code> = any character &nbsp;|&nbsp;
+            <code>*</code> = 0 or more &nbsp;|&nbsp;
+            <code>+</code> = 1 or more &nbsp;|&nbsp;
+            <code>?</code> = optional &nbsp;|&nbsp;
+            <code>^</code> = start &nbsp;|&nbsp;
+            <code>$</code> = end<br>
+            <code>\d</code> = digit &nbsp;|&nbsp;
+            <code>\w</code> = word char &nbsp;|&nbsp;
+            <code>\s</code> = whitespace &nbsp;|&nbsp;
+            <code>[abc]</code> = a, b, or c &nbsp;|&nbsp;
+            <code>(a|b)</code> = a OR b
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regex Explanation Modal (What is Regex?) -->
+  <div id="regexExplanationModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2>What is Regular Expression?</h2>
+        <button id="closeRegexExplanation" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
+          A regular expression (regex) is a powerful pattern matching tool that lets you search for complex text patterns instead of just exact matches.
+        </p>
+
+        <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 13px; font-weight: 600;">Basic Examples:</h3>
+        <div style="margin-bottom: 16px;">
+          <div style="margin-bottom: 10px;">
+            <div style="font-family: 'Monaco', 'Courier New', monospace; font-size: 11px; color: var(--accent); margin-bottom: 4px;">^_ab</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Starts with "_ab" (the ^ means beginning)</div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-family: 'Monaco', 'Courier New', monospace; font-size: 11px; color: var(--accent); margin-bottom: 4px;">ck$</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Ends with "ck" (the $ means end)</div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <div style="font-family: 'Monaco', 'Courier New', monospace; font-size: 11px; color: var(--accent); margin-bottom: 4px;">.*token.*</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Contains "token" anywhere (the .* means any characters)</div>
+          </div>
+          <div>
+            <div style="font-family: 'Monaco', 'Courier New', monospace; font-size: 11px; color: var(--accent); margin-bottom: 4px;">(akamai|datadome)</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Matches "akamai" OR "datadome" (the | means OR)</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(59,130,246,0.08); border-left: 3px solid var(--accent); border-radius: 4px;">
+          <p style="font-size: 11px; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 500;">When to use Regex:</p>
+          <ul style="font-size: 10px; color: var(--text-muted); margin: 0; padding-left: 20px;">
+            <li>Matching patterns that start or end with specific text</li>
+            <li>Finding multiple variations (using OR: |)</li>
+            <li>Matching numbers or specific character types</li>
+            <li>Complex matching rules</li>
+          </ul>
+        </div>
+
+        <div style="padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <p style="font-size: 10px; color: var(--text-muted); margin: 0;"><strong>💡 Tip:</strong> If you just need to match exact text, you don't need regex - use "Match Whole Word Only" instead. Regex is for complex patterns.</p>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="closeRegexExplanationBtn" class="rule-btn rule-btn-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Whole Word Explanation Modal -->
+  <div id="wholeWordExplanationModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2>What is "Match Whole Word Only"?</h2>
+        <button id="closeWholeWordExplanation" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
+          "Whole Word Only" means the pattern must be a complete word surrounded by boundaries (spaces, punctuation, start/end of text). It prevents partial matches.
+        </p>
+
+        <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 13px; font-weight: 600;">Example with Cookie Name "_abck":</h3>
+        <div style="margin-bottom: 16px;">
+          <table style="font-size: 11px; width: 100%; border-collapse: collapse;">
+            <tr style="background: var(--bg-secondary);">
+              <td style="padding: 8px; border: 1px solid var(--border);">Text Found</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Matches?</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Reason</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);">_abck</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #10b981;">✓ Yes</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Exact match, surrounded by boundaries</td>
+            </tr>
+            <tr style="background: var(--bg-secondary);">
+              <td style="padding: 8px; border: 1px solid var(--border);">test_abck</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #ef4444;">✗ No</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Connected to "test", not a complete word</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);">_abckMore</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #ef4444;">✗ No</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Connected to "More", not complete word</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(16,185,129,0.08); border-left: 3px solid #10b981; border-radius: 4px;">
+          <p style="font-size: 11px; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 500;">Best for matching:</p>
+          <ul style="font-size: 10px; color: var(--text-muted); margin: 0; padding-left: 20px;">
+            <li>Exact cookie names</li>
+            <li>Specific header names</li>
+            <li>Complete class or function names</li>
+          </ul>
+        </div>
+
+        <div style="padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <p style="font-size: 10px; color: var(--text-muted); margin: 0;"><strong>💡 Tip:</strong> Without this option, searching for "_abck" might match "_abckMore", "_abckValue", and other variations.</p>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="closeWholeWordExplanationBtn" class="rule-btn rule-btn-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Case Sensitive Explanation Modal -->
+  <div id="caseSensitiveExplanationModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2>What is "Case Sensitive"?</h2>
+        <button id="closeCaseSensitiveExplanation" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
+          "Case Sensitive" means uppercase (A, B, C...) and lowercase (a, b, c...) letters are treated as different. When disabled, it ignores case differences.
+        </p>
+
+        <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 13px; font-weight: 600;">Example with Cookie Name "Akamai":</h3>
+        <div style="margin-bottom: 16px;">
+          <table style="font-size: 11px; width: 100%; border-collapse: collapse;">
+            <tr style="background: var(--bg-secondary);">
+              <td style="padding: 8px; border: 1px solid var(--border);">Text Found</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">With Case Sensitive</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Without Case Sensitive</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);">Akamai</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #10b981;">✓ Match</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #10b981;">✓ Match</td>
+            </tr>
+            <tr style="background: var(--bg-secondary);">
+              <td style="padding: 8px; border: 1px solid var(--border);">akamai</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #ef4444;">✗ No match</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #10b981;">✓ Match</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);">AKAMAI</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #ef4444;">✗ No match</td>
+              <td style="padding: 8px; border: 1px solid var(--border); color: #10b981;">✓ Match</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; border-radius: 4px;">
+          <p style="font-size: 11px; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 500;">Best for detecting:</p>
+          <ul style="font-size: 10px; color: var(--text-muted); margin: 0; padding-left: 20px;">
+            <li>Specific browser headers (often case-sensitive)</li>
+            <li>Cookie names with exact capitalization</li>
+            <li>JavaScript property names</li>
+          </ul>
+        </div>
+
+        <div style="padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <p style="font-size: 10px; color: var(--text-muted); margin: 0;"><strong>⚠️ Important:</strong> Most browser headers and cookies ARE case-sensitive, so enable this option for accurate detection.</p>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="closeCaseSensitiveExplanationBtn" class="rule-btn rule-btn-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Condition Helper Modal (for WINDOW properties) -->
+  <div id="conditionHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2>Window Property Condition Helper</h2>
+        <button id="closeConditionHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+          Select a condition to check for the window property. Click to use.
+        </p>
+
+        <div class="dom-templates">
+          <!-- Type Checks -->
+          <div style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">Type Checks:</div>
+          </div>
+
+          <div class="condition-option" data-condition="typeof object">
+            <div class="template-code">typeof object</div>
+            <div class="template-description">Property is an object (not null)</div>
+          </div>
+
+          <div class="condition-option" data-condition="typeof function">
+            <div class="template-code">typeof function</div>
+            <div class="template-description">Property is a function</div>
+          </div>
+
+          <div class="condition-option" data-condition="typeof string">
+            <div class="template-code">typeof string</div>
+            <div class="template-description">Property is a string</div>
+          </div>
+
+          <div class="condition-option" data-condition="typeof number">
+            <div class="template-code">typeof number</div>
+            <div class="template-description">Property is a number</div>
+          </div>
+
+          <div class="condition-option" data-condition="typeof boolean">
+            <div class="template-code">typeof boolean</div>
+            <div class="template-description">Property is a boolean</div>
+          </div>
+
+          <!-- Existence Checks -->
+          <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">Existence Checks:</div>
+          </div>
+
+          <div class="condition-option" data-condition="truthy">
+            <div class="template-code">truthy</div>
+            <div class="template-description">Property exists and is truthy (most common)</div>
+          </div>
+
+          <div class="condition-option" data-condition="falsy">
+            <div class="template-code">falsy</div>
+            <div class="template-description">Property is falsy (false, 0, null, undefined, '')</div>
+          </div>
+
+          <div class="condition-option" data-condition="!== undefined">
+            <div class="template-code">!== undefined</div>
+            <div class="template-description">Property is defined (not undefined)</div>
+          </div>
+
+          <div class="condition-option" data-condition="=== undefined">
+            <div class="template-code">=== undefined</div>
+            <div class="template-description">Property is undefined</div>
+          </div>
+
+          <div class="condition-option" data-condition="!== null">
+            <div class="template-code">!== null</div>
+            <div class="template-description">Property is not null</div>
+          </div>
+
+          <div class="condition-option" data-condition="=== null">
+            <div class="template-code">=== null</div>
+            <div class="template-description">Property is null</div>
+          </div>
+
+          <!-- Array Check -->
+          <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">Special Checks:</div>
+          </div>
+
+          <div class="condition-option" data-condition="array">
+            <div class="template-code">array</div>
+            <div class="template-description">Property is an array</div>
+          </div>
+
+          <div class="condition-option" data-condition="non-empty array">
+            <div class="template-code">non-empty array</div>
+            <div class="template-description">Property is an array with items</div>
+          </div>
+
+          <div class="condition-option" data-condition="empty array">
+            <div class="template-code">empty array</div>
+            <div class="template-description">Property is an empty array</div>
+          </div>
+
+          <div class="condition-option" data-condition="has keys">
+            <div class="template-code">has keys</div>
+            <div class="template-description">Object has at least one key</div>
+          </div>
+
+          <div class="condition-option" data-condition="empty object">
+            <div class="template-code">empty object</div>
+            <div class="template-description">Object has no keys</div>
+          </div>
+
+          <!-- Numeric Comparisons -->
+          <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">Numeric Comparisons:</div>
+          </div>
+
+          <div class="condition-option" data-condition="> 0">
+            <div class="template-code">> 0</div>
+            <div class="template-description">Number greater than 0</div>
+          </div>
+
+          <div class="condition-option" data-condition=">= 0">
+            <div class="template-code">>= 0</div>
+            <div class="template-description">Number greater than or equal to 0</div>
+          </div>
+
+          <div class="condition-option" data-condition="=== 0">
+            <div class="template-code">=== 0</div>
+            <div class="template-description">Number equals 0</div>
+          </div>
+
+          <div class="condition-option" data-condition="> 1">
+            <div class="template-code">> 1</div>
+            <div class="template-description">Number greater than 1</div>
+          </div>
+
+          <div class="condition-option" data-condition=">= 1">
+            <div class="template-code">>= 1</div>
+            <div class="template-description">Number greater than or equal to 1</div>
+          </div>
+
+          <!-- String Checks -->
+          <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">String Checks:</div>
+          </div>
+
+          <div class="condition-option" data-condition="length > 0">
+            <div class="template-code">length > 0</div>
+            <div class="template-description">String has content (not empty)</div>
+          </div>
+
+          <div class="condition-option" data-condition="length === 0">
+            <div class="template-code">length === 0</div>
+            <div class="template-description">String is empty</div>
+          </div>
+
+          <!-- Boolean Checks -->
+          <div style="margin: 16px 0; border-top: 1px solid var(--border); padding-top: 16px;">
+            <div style="font-weight: 600; font-size: 11px; margin-bottom: 12px; color: var(--text-secondary);">Boolean Checks:</div>
+          </div>
+
+          <div class="condition-option" data-condition="=== true">
+            <div class="template-code">=== true</div>
+            <div class="template-description">Property is exactly true</div>
+          </div>
+
+          <div class="condition-option" data-condition="=== false">
+            <div class="template-code">=== false</div>
+            <div class="template-description">Property is exactly false</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <div style="font-weight: 600; font-size: 11px; margin-bottom: 8px; color: var(--text-primary);">Examples:</div>
+          <div style="font-size: 10px; color: var(--text-muted); line-height: 1.8;">
+            <strong>bmak</strong> → <code>typeof object</code> (Akamai Bot Manager object)<br>
+            <strong>grecaptcha.ready</strong> → <code>typeof function</code> (reCAPTCHA ready function)<br>
+            <strong>__xr_bmobdb</strong> → <code>typeof object</code> (Shape Security object)<br>
+            <strong>_Incapsula_API</strong> → <code>truthy</code> (Imperva/Incapsula exists)
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="closeConditionHelperBtn" class="rule-btn rule-btn-cancel">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Request Configuration Modal -->
+  <div id="networkRequestModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h3>Configure Network Request Detection</h3>
+        <button class="rule-modal-close" id="networkRequestModalClose">&times;</button>
+      </div>
+
+      <div class="rule-modal-body">
+        <div class="network-form-group">
+          <label class="network-form-label">URL Pattern</label>
+          <input type="text" id="networkUrl" class="network-form-input" placeholder="e.g., /api/verify or challenge">
+          <div class="network-checkbox-group">
+            <label><input type="checkbox" id="networkUrlRegex"> Regex</label>
+            <label><input type="checkbox" id="networkUrlWholeWord"> Whole Word</label>
+            <label><input type="checkbox" id="networkUrlCaseSensitive"> Case Sensitive</label>
+          </div>
+        </div>
+
+        <div class="network-form-group">
+          <label class="network-form-label">HTTP Method</label>
+          <select id="networkMethod" class="network-form-input">
+            <option value="">Any</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+          <div class="network-checkbox-group">
+            <label><input type="checkbox" id="networkMethodRegex"> Regex</label>
+            <label><input type="checkbox" id="networkMethodCaseSensitive"> Case Sensitive</label>
+          </div>
+        </div>
+
+        <div class="network-form-group">
+          <label class="network-form-label">Body Content (for POST/PUT/PATCH)</label>
+          <input type="text" id="networkBody" class="network-form-input" placeholder="e.g., sensor_data or challenge_token">
+          <div class="network-checkbox-group">
+            <label><input type="checkbox" id="networkBodyRegex"> Regex</label>
+            <label><input type="checkbox" id="networkBodyWholeWord"> Whole Word</label>
+            <label><input type="checkbox" id="networkBodyCaseSensitive"> Case Sensitive</label>
+          </div>
+        </div>
+
+        <div class="network-form-group">
+          <label class="network-form-label">Confidence (%)</label>
+          <input type="number" id="networkConfidence" class="network-form-input" min="0" max="100" value="85">
+        </div>
+
+        <div class="network-form-group">
+          <label class="network-form-label">Description</label>
+          <input type="text" id="networkDescription" class="network-form-input" placeholder="e.g., Akamai sensor data POST">
+        </div>
+      </div>
+
+      <div class="rule-modal-footer">
+        <button id="networkRequestSave" class="rule-btn rule-btn-primary">Save</button>
+        <button id="networkRequestCancel" class="rule-btn rule-btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method Help Modal -->
+  <div id="methodHelpModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content" style="max-width: 600px;">
+      <div class="rule-modal-header">
+        <h2 id="methodHelpTitle">Help & Documentation</h2>
+        <button id="closeMethodHelp" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body" id="methodHelpContent" style="line-height: 1.6;">
+        <!-- Help content will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Whole Word Helper Modal (2-Step) -->
+  <div id="wholeWordHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content">
+      <div class="rule-modal-header">
+        <h2>Whole Word Matcher</h2>
+        <button id="closeWholeWordHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Step Indicators -->
+        <div class="dom-helper-steps two-steps" data-progress="1">
+          <div class="dom-step active" id="wholeWordStep1">
+            <div class="dom-step-number"><span>1</span></div>
+            <div class="dom-step-label">What do you need?</div>
+          </div>
+          <div class="dom-step" id="wholeWordStep2">
+            <div class="dom-step-number"><span>2</span></div>
+            <div class="dom-step-label">View Examples</div>
+          </div>
+        </div>
+
+        <!-- Contextual Tip -->
+        <div class="step-contextual-tip" style="border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.08);">
+          <svg class="tip-icon" viewBox="0 0 24 24" fill="#10b981">
+            <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+          </svg>
+          <div class="tip-content">
+            <strong>Tip:</strong> Whole word matching prevents partial matches. "test" won't match "testing" or "attest".
+          </div>
+        </div>
+
+        <!-- Step 1: Keyword Input -->
+        <div class="dom-step-content">
+          <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+            What pattern do you want to match?
+          </h4>
+          <input type="text" id="wholeWordKeywordInput"
+                 placeholder="e.g., cookie name, header name, exact match"
+                 autocomplete="off">
+        </div>
+
+        <!-- Step 2: Examples -->
+        <div class="dom-suggestions-section" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            How It Works
+          </h4>
+          <div id="wholeWordExamples" class="dom-templates">
+            <div class="suggestions-empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+              </svg>
+              <div class="empty-title">Start typing to see examples</div>
+              <div class="empty-hint">We'll show how whole word matching affects your pattern</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <p style="font-size: 11px; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 600;">About Whole Word:</p>
+          <p style="font-size: 10px; color: var(--text-muted); margin: 0;">Matches only when the text is surrounded by word boundaries (spaces, punctuation, start/end of text). Prevents partial matches.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Case Sensitive Helper Modal (2-Step) -->
+  <div id="caseSensitiveHelperModal" class="rule-modal" style="display: none;">
+    <div class="rule-modal-backdrop"></div>
+    <div class="rule-modal-content">
+      <div class="rule-modal-header">
+        <h2>Case Sensitive Matcher</h2>
+        <button id="closeCaseSensitiveHelper" class="rule-modal-close">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rule-modal-body">
+        <!-- Step Indicators -->
+        <div class="dom-helper-steps two-steps" data-progress="1">
+          <div class="dom-step active" id="caseSensitiveStep1">
+            <div class="dom-step-number"><span>1</span></div>
+            <div class="dom-step-label">What do you need?</div>
+          </div>
+          <div class="dom-step" id="caseSensitiveStep2">
+            <div class="dom-step-number"><span>2</span></div>
+            <div class="dom-step-label">View Examples</div>
+          </div>
+        </div>
+
+        <!-- Contextual Tip -->
+        <div class="step-contextual-tip" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.08);">
+          <svg class="tip-icon" viewBox="0 0 24 24" fill="#ef4444">
+            <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
+          </svg>
+          <div class="tip-content">
+            <strong>Tip:</strong> Case sensitive means "Test", "test", and "TEST" are all different. Enable for exact matching.
+          </div>
+        </div>
+
+        <!-- Step 1: Keyword Input -->
+        <div class="dom-step-content">
+          <h4 style="margin-top: 0; color: var(--text-primary); font-size: 14px; font-weight: 600;">
+            What pattern are you matching?
+          </h4>
+          <input type="text" id="caseSensitiveKeywordInput"
+                 placeholder="e.g., cookie name, header, class name"
+                 autocomplete="off">
+        </div>
+
+        <!-- Step 2: Examples -->
+        <div class="dom-suggestions-section" style="margin-top: 20px;">
+          <h4 style="color: var(--text-primary); font-size: 14px; font-weight: 600; margin-bottom: 12px;">
+            Case Sensitivity Examples
+          </h4>
+          <div id="caseSensitiveExamples" class="dom-templates">
+            <div class="suggestions-empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2,4V7H7V19H10V7H15V4H2M21,9H12V12H15V19H18V12H21V9Z"/>
+              </svg>
+              <div class="empty-title">Start typing to see examples</div>
+              <div class="empty-hint">We'll show how case sensitivity affects your pattern</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+          <p style="font-size: 11px; color: var(--text-primary); margin: 0 0 6px 0; font-weight: 600;">About Case Sensitivity:</p>
+          <p style="font-size: 10px; color: var(--text-muted); margin: 0;">When enabled, "Test", "test", and "TEST" are treated as different. When disabled, they all match.</p>
+        </div>
+      </div>
+    </div>
+  </div>

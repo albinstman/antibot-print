@@ -1,0 +1,36 @@
+{
+  "id": "detect-sucuri",
+  "name": "Sucuri WAF",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "Anti-Bot",
+  "lastUpdated": "2024-01-15",
+  "version": "1.0",
+  "website": "https://sucuri.net/",
+  "icon": "sucuri_official.png",
+  "description": "Sucuri Website Security Platform with WAF and bot protection",
+  "detection": {
+    "cookie": [
+    
+    ],
+    "header": [
+    
+    ],
+    "url": [
+    
+    ],
+    "content": [
+      {
+        "confidence": 50,
+        "description": "Sucuri reference in scripts",
+        "text": "sucuri",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      }
+    ],
+    "dom": [
+      
+    ]
+  }
+}

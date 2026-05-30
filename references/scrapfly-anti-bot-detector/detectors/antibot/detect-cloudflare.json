@@ -1,0 +1,79 @@
+{
+  "id": "detect-cloudflare",
+  "name": "Cloudflare Bot Management",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "Anti-Bot",
+  "lastUpdated": "2024-01-15",
+  "version": "1.0",
+  "website": "https://www.cloudflare.com/products/bot-management/",
+  "icon": "cloudflare_official.png",
+  "description": "AI-powered bot detection and mitigation with global CDN integration",
+  "detection": {
+    "cookie": [
+      {
+        "name": "__cf_bm",
+        "confidence": 50,
+        "description": "Bot management cookie",
+        "nameRegex": false,
+        "nameWholeWord": false,
+        "nameCaseSensitive": false,
+        "value": "",
+        "valueRegex": false,
+        "valueWholeWord": false,
+        "valueCaseSensitive": false,
+        "nameScope": "all",
+        "valueScope": "all"
+      },
+      {
+        "name": "cf_clearance",
+        "confidence": 100,
+        "description": "Challenge clearance cookie",
+        "nameRegex": false,
+        "nameWholeWord": false,
+        "nameCaseSensitive": false,
+        "value": "",
+        "valueRegex": false,
+        "valueWholeWord": false,
+        "valueCaseSensitive": false,
+        "nameScope": "all",
+        "valueScope": "all"
+      }
+    ],
+    "header": [],
+    "url": [
+      {
+        "confidence": 90,
+        "description": "Cloudflare CDN endpoint",
+        "text": "cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 100,
+        "text": "challenges.cloudflare.com",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      }
+    ],
+    "content": [],
+    "window": [
+      {
+        "path": "_cf_chl_opt",
+        "condition": "typeof object",
+        "confidence": 95,
+        "description": "Cloudflare challenge options object"
+      },
+      {
+        "path": "turnstile",
+        "condition": "typeof object",
+        "confidence": 95,
+        "description": "Cloudflare Turnstile CAPTCHA object"
+      }
+    ]
+  }
+}

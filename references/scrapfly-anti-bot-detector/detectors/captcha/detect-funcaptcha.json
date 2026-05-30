@@ -1,0 +1,136 @@
+{
+  "id": "detect-funcaptcha",
+  "name": "FunCaptcha (Arkose Labs)",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "CAPTCHA",
+  "lastUpdated": "2024-01-15",
+  "version": "1.0",
+  "website": "https://www.arkoselabs.com/",
+  "icon": "funcaptcha_official.png",
+  "description": "Interactive game-based CAPTCHA by Arkose Labs",
+  "detection": {
+    "cookie": [
+      
+    ],
+    "header": [
+     
+    ],
+    "url": [
+      {
+        "confidence": 100,
+        "description": "Arkose Labs API endpoint",
+        "text": "client-api.arkoselabs.com",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 100,
+        "description": "Legacy FunCaptcha API",
+        "text": "api.funcaptcha.com",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 95,
+        "description": "FunCaptcha no-JS API",
+        "text": "/fc/api/nojs/",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      },
+      {
+        "confidence": 90,
+        "description": "Arkose enforcement script",
+        "text": "/enforcement.*.js",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      }
+    ],
+    "content": [
+      {
+        "confidence": 50,
+        "description": "Arkose callback function",
+        "text": "window.arkoseCallback",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "description": "Arkose enforcement object",
+        "text": "ArkoseEnforce",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "text": "funcaptcha",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      },
+      {
+        "confidence": 50,
+        "text": "setupEnforcement",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      }
+    ],
+    "dom": [
+      {
+        "selector": "[data-arkose]",
+        "confidence": 100,
+        "description": "Arkose data attribute",
+        "selectorRegex": false,
+        "selectorWholeWord": false,
+        "selectorCaseSensitive": false
+      },
+      {
+        "selector": ".arkose-labs",
+        "confidence": 95,
+        "description": "Arkose CSS class",
+        "selectorRegex": false,
+        "selectorWholeWord": false,
+        "selectorCaseSensitive": false
+      },
+      {
+        "selector": "#FunCaptcha",
+        "confidence": 90,
+        "description": "FunCaptcha container ID",
+        "selectorRegex": false,
+        "selectorWholeWord": false,
+        "selectorCaseSensitive": false
+      }
+    ],
+    "window": [
+      {
+        "path": "ArkoseEnforce",
+        "condition": "typeof object",
+        "confidence": 100,
+        "description": "Arkose enforcement object"
+      },
+      {
+        "path": "arkoseCallback",
+        "condition": "typeof function",
+        "confidence": 95,
+        "description": "Arkose callback function"
+      },
+      {
+        "path": "setupEnforcement",
+        "condition": "typeof function",
+        "confidence": 85,
+        "description": "Arkose setup enforcement function"
+      }
+    ]
+  }
+}

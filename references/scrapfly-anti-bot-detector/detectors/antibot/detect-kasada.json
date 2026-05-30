@@ -1,0 +1,40 @@
+{
+  "id": "detect-kasada",
+  "name": "Kasada",
+  "author": "Scrapfly",
+  "enabled": true,
+  "category": "Anti-Bot",
+  "lastUpdated": "2025-01-29",
+  "version": "1.0",
+  "website": "https://www.kasada.io/",
+  "icon": "custom.png",
+  "description": "Advanced bot detection and mitigation platform using behavioral analysis and threat intelligence",
+  "detection": {
+    "cookie": [],
+    "header": [],
+    "url": [
+      {
+        "confidence": 95,
+        "description": "Kasada IPS script",
+        "text": "ips.js",
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false,
+        "textScope": "all"
+      }
+    ],
+    "content": [
+      {
+        "text": "kasada",
+        "confidence": 50,
+        "description": "Kasada namespace reference",
+        "checkScripts": false,
+        "textRegex": false,
+        "textWholeWord": false,
+        "textCaseSensitive": false
+      }
+    ],
+    "dom": [],
+    "window": []
+  }
+}
