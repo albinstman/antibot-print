@@ -1,5 +1,7 @@
-# Reference material / existing files (not part of antibot-print yet)
+# Reference material — local-only, third-party, not part of antibot-print
+# (kept out of the public repo; the README documents what lives here)
 scrapfly-anti-bot-detector/
+references/
 
 # Local tooling
 .claude/
