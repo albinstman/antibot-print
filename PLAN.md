@@ -145,15 +145,6 @@ Agents read **both** local reference sources:
 - `references/hypersolutions-docs/` — vendor challenge documentation: cookies, headers, status codes, script endpoints.
 - `references/scrapfly-anti-bot-detector/` — a browser-extension detector. Its `detectors/index.json` and per-detector logic catalog vendors and the signals they emit; extract only the parts observable in a static HTTP response.
 
-## Vendor coverage (Phase 1)
-
-Cover every vendor for which a genuine static-HTTP signal can be derived from the reference
-sources — antibot/WAF vendors and captcha vendors alike — with no prioritization between them.
-Each vendor keeps only signals that survive in a static HTTP response.
-
-**Excluded:** JS-only fingerprint detectors (canvas, webgl, audio, navigator, …), which are
-unobservable in a static response.
-
 ---
 
 ## Definition of done
