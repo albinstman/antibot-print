@@ -30,22 +30,11 @@ groups that match are the output (a set of vendor slugs).
 
 ## Input model & normalization
 
-Before the regex runs, every response is serialized into a single canonical, context-tagged
-string. Normalization is minimal and wire-aware: for a raw HTTP/1.1 byte stream it is nearly a
-pass-through (split on the first `\r\n\r\n`, lowercase header names, add tags, cap the body).
+Before the regex runs, every response is serialized into one canonical, context-tagged string.
+This gives the regex a uniform input across sources (parsed clients, proxy logs, HAR, raw
+bytes) and protocol versions (HTTP/1.1 and HTTP/2/3, which has no `\r\n` framing).
 
-Normalization gives the regex one uniform input regardless of source:
-
-- Inputs usually arrive already parsed (`requests`/`httpx`, proxy logs, HAR) as
-  `(status, headers, body)`, not as raw bytes.
-- HTTP/2 and HTTP/3 have no `\r\n` framing (binary HPACK/QPACK), yet cover most major-vendor
-  targets; normalization unifies them with HTTP/1.1.
-- Raw header case, whitespace, and cookie joining vary; normalizing lets signatures stay simple
-  and strict.
-- Context tags (`S:`/`H:`/`B:`) let each signal anchor to status, header, or body and OR
-  cleanly into one alternation.
-
-### Canonical format (what the regex runs against)
+### Canonical format
 
 ```
 S:<status-code>
@@ -54,14 +43,12 @@ H:set-cookie:<cookie-name>=<value>          # one line per Set-Cookie
 B:<body, capped at 64 KB>
 ```
 
-- Header names lowercased; raw values preserved.
-- One line per header and per `Set-Cookie`.
-- Body appended under `B:` lines, capped (default 64 KB) to preserve linear-time scanning.
-- Lines joined with `\n`. The regex is compiled with multiline semantics so the `S:`/`H:`/`B:`
-  prefixes anchor each signal to its context.
+- Header names lowercased, values preserved; one line per header and per `Set-Cookie`.
+- Body capped (default 64 KB) to keep scanning linear-time.
+- Lines joined with `\n`; compiled with multiline semantics so the `S:`/`H:`/`B:` prefixes
+  anchor each signal to its context.
 
-The README documents this format and provides reference normalizer snippets (Python, JS, Go,
-awk) so any consumer can reproduce the canonical string exactly.
+The README provides reference normalizer snippets (Python, JS, Go, awk).
 
 ---
 
