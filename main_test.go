@@ -43,6 +43,14 @@ func TestDetect(t *testing.T) {
 			[]string{"akamai", "recaptcha"},
 		},
 		{
+			// Akamai's primary signal: the dynamic script endpoint embedded in
+			// the page (no cookies set yet on the first GET).
+			"akamai script endpoint in body",
+			"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" +
+				`<script type="text/javascript" src="/NW8v7h/PL/5Y/ju4o/cXo1d3-69Ymik/f07uLShic9/MzUWAQ/KzdU/EGoXBRV2" defer></script>`,
+			[]string{"akamai"},
+		},
+		{
 			"benign nginx (negative)",
 			"HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\n<html>hello world</html>",
 			[]string{},
