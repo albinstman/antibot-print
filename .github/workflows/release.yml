@@ -14,11 +14,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
+          cache: false   # no dependencies (no go.sum) -> nothing to cache
 
       - name: Compile the latest regex from signatures
         run: go run . compile   # regenerates antibot.re2.txt; the build embeds this
