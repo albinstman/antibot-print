@@ -29,6 +29,11 @@ cloudflare
 
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
 
+> **Tip:** the tool only sees what's in the response you give it. Evasion-aware WAFs
+> (Akamai, DataDome, …) reveal their cookies/scripts only to requests that look like a
+> real browser — send browser headers, and ideally a browser TLS fingerprint
+> (see [Roadmap](#roadmap)).
+
 ## Language integration
 
 ### Go
@@ -190,6 +195,22 @@ To add or change a vendor, edit a `signatures/<vendor>.json` (each signal prefix
 `S:`/`H:`/`B:`, valid RE2, vendor-specific) and run `go run . compile`. Pushing to
 `main` recompiles the regex and rebuilds every platform binary into the rolling
 **latest** release, so the signature files are the only thing you maintain.
+
+## Roadmap
+
+- [ ] **Fetch the URL directly** — `antibot-print https://example.com` instead of
+  piping `curl`, sending a browser-like TLS/HTTP-2 fingerprint and header set so
+  evasion-aware WAFs actually reveal themselves. In Go this means an impersonating
+  client such as [`bogdanfinn/tls-client`](https://github.com/bogdanfinn/tls-client)
+  or [`utls`](https://github.com/refraction-networking/utls); the alternative is to
+  keep piping from a TLS-impersonating fetcher
+  ([`curl_cffi`](https://github.com/lexiforest/curl_cffi) in Python, or the
+  [`lexiforest/curl-impersonate`](https://github.com/lexiforest/curl-impersonate) CLI).
+- [ ] **Audit the signals** — keep only signals that indicate an actual antibot
+  *challenge*, not mere CDN/vendor presence (e.g. an Akamai-accelerated site not
+  running Bot Manager, or generic Google session cookies). Prefer high-confidence,
+  challenge-specific signals even when the regex gets gnarly — like the Akamai
+  script-endpoint pattern `B:<script[^>]*\bsrc="/(?:[a-zA-Z0-9_-]+/){5,}[a-zA-Z0-9_-]*[A-Z][a-zA-Z0-9_/-]*"`.
 
 ## License
 
