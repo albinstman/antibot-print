@@ -1,0 +1,20 @@
+{
+  "vendor": "akamai",
+  "signals": [
+    "H:set-cookie:_abck=",
+    "H:set-cookie:bm_sz=",
+    "H:set-cookie:ak_bmsc=",
+    "H:set-cookie:bm_sv=",
+    "H:set-cookie:bm_mi=",
+    "H:set-cookie:bm_so=",
+    "H:set-cookie:sbsd=",
+    "H:set-cookie:sbsd_o=",
+    "H:set-cookie:sec_cpt=",
+    "H:server:(?i:AkamaiGHost)",
+    "H:server:(?i:AkamaiNetStorage)",
+    "B:.*\\bbazadebezolkohpepadr\\b",
+    "B:.*\"sec-cp-challenge\"\\s*:\\s*\"true\"",
+    "B:.*/_sec/cp_challenge/",
+    "B:.*/\\.well-known/sbsd/"
+  ]
+}

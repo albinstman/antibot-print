@@ -1,0 +1,18 @@
+{
+  "vendor": "perimeterx",
+  "signals": [
+    "H:set-cookie:_px2=",
+    "H:set-cookie:_px3=",
+    "H:set-cookie:_pxhd=",
+    "H:set-cookie:_pxvid=",
+    "H:set-cookie:_pxff_",
+    "H:set-cookie:pxcts=",
+    "H:set-cookie:_pxde=",
+    "B:.*\\bwindow\\._pxAppId\\b",
+    "B:.*collector-[a-z0-9]+\\.perimeterx\\.net",
+    "B:.*\\bcaptcha\\.px-cdn\\.net\\b",
+    "B:.*\\bclient\\.perimeterx\\.net\\b",
+    "B:.*\\b_pxOnCaptchaSuccess\\b",
+    "B:.*Access to this page has been denied because we believe you are using automation tools"
+  ]
+}

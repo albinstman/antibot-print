@@ -1,0 +1,55 @@
+name: release
+
+# Build cross-platform binaries on every push to main and publish them to a
+# rolling "latest" release that install.sh downloads from.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Compile the latest regex from signatures
+        run: go run . compile   # regenerates antibot.re2.txt; the build embeds this
+
+      - name: Vet and test
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Build binaries
+        run: |
+          mkdir -p dist
+          VERSION="$(git rev-parse --short HEAD)"
+          targets="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64"
+          for t in $targets; do
+            os="${t%/*}"; arch="${t#*/}"
+            out="dist/antibot-print-${os}-${arch}"
+            [ "$os" = "windows" ] && out="${out}.exe"
+            echo "building $out"
+            GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
+              go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "$out" .
+          done
+          ( cd dist && sha256sum * > SHA256SUMS )
+          ls -l dist
+
+      - name: Publish rolling "latest" release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest dist/* \
+            --title "Latest build ($(git rev-parse --short HEAD))" \
+            --notes "Automated build from ${{ github.sha }}." \
+            --latest

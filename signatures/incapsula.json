@@ -1,0 +1,16 @@
+{
+  "vendor": "incapsula",
+  "signals": [
+    "H:set-cookie:incap_ses_",
+    "H:set-cookie:visid_incap_",
+    "H:set-cookie:incap_sh_",
+    "H:set-cookie:nlbi_",
+    "H:set-cookie:reese84=",
+    "H:set-cookie:___utmvc=",
+    "H:x-iinfo:",
+    "H:x-cdn:(?i:Incapsula)",
+    "B:.*/_Incapsula_Resource\\?",
+    "B:.*Incapsula incident ID",
+    "B:.*window\\._Incapsula"
+  ]
+}

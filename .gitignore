@@ -1,5 +1,3 @@
-
-
 # Local tooling
 .claude/
 .devcontainer/
@@ -7,3 +5,8 @@
 # OS / editor noise
 .DS_Store
 *.log
+
+# Go build outputs
+/antibot-print
+/antibot-print.exe
+/dist/

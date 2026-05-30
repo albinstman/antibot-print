@@ -1,0 +1,11 @@
+{
+  "vendor": "datadome",
+  "signals": [
+    "H:set-cookie:datadome=",
+    "H:x-datadome-cid:",
+    "H:x-datadome:",
+    "B:.*https://ct\\.captcha-delivery\\.com/[ic]\\.js",
+    "B:.*\\bgeo\\.captcha-delivery\\.com\\b",
+    "B:.*https://dd\\.prod\\.captcha-delivery\\.com/image/"
+  ]
+}

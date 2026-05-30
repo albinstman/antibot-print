@@ -1,0 +1,14 @@
+{
+  "vendor": "cloudflare",
+  "signals": [
+    "H:set-cookie:__cf_bm=",
+    "H:set-cookie:cf_clearance=",
+    "H:cf-ray:",
+    "H:cf-mitigated:",
+    "H:server:(?i:cloudflare)\\b",
+    "B:.*/cdn-cgi/challenge-platform/",
+    "B:.*challenges\\.cloudflare\\.com",
+    "B:.*\\b_cf_chl_opt\\b",
+    "B:.*Attention Required! \\| Cloudflare"
+  ]
+}
