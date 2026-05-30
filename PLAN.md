@@ -78,19 +78,17 @@ slug, `signals` is a non-empty array, and every pattern compiles under RE2.
 ## Output: vendor-named capture groups
 
 The compiler produces one named capture group per vendor, whose body is an alternation of that
-vendor's signals:
+vendor's signals. Schematically:
 
 ```
-(?P<cloudflare>H:server:\s*cloudflare|H:cf-ray:|H:set-cookie:__cf_bm=|B:.*Just a moment)
-|(?P<datadome>H:set-cookie:\s*datadome=|H:server:\s*DataDome)
-|(?P<akamai>H:set-cookie:\s*_abck=|H:server:\s*AkamaiGHost)
+(?P<vendor_a><signal>|<signal>|…)|(?P<vendor_b><signal>|<signal>|…)|…
 ```
 
 Matching globally and collecting the non-null named groups yields the answer directly:
 
 ```python
 hits = {g for m in regex.finditer(norm) for g, v in m.groupdict().items() if v}
-# → {'cloudflare', 'datadome'}
+# → set of matched vendor slugs
 ```
 
 The group name is the vendor slug — that is the entire output contract.
