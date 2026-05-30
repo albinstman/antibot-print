@@ -1,0 +1,10 @@
+# Reference material / existing files (not part of antibot-print yet)
+scrapfly-anti-bot-detector/
+
+# Local tooling
+.claude/
+.devcontainer/
+
+# OS / editor noise
+.DS_Store
+*.log
