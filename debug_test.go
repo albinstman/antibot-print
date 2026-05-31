@@ -92,6 +92,42 @@ func TestWriteDebugTier(t *testing.T) {
 	}
 }
 
+// TestParseHops checks the chain parser pulls each hop's status and Location.
+func TestParseHops(t *testing.T) {
+	raw := "HTTP/1.1 301 Moved Permanently\r\nLocation: https://www.example.com/\r\n\r\n" +
+		"HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\n<html>ok</html>"
+	hops := parseHops([]byte(raw))
+	if len(hops) != 2 {
+		t.Fatalf("parseHops returned %d hops, want 2: %+v", len(hops), hops)
+	}
+	if hops[0].status != 301 || hops[0].location != "https://www.example.com/" {
+		t.Errorf("hop 0 = %+v, want {301 https://www.example.com/}", hops[0])
+	}
+	if hops[1].status != 200 || hops[1].location != "" {
+		t.Errorf("hop 1 = %+v, want {200 \"\"}", hops[1])
+	}
+}
+
+// TestWriteDebugRedirectChain checks a multi-hop fetch reconstructs the visited
+// URLs (resolving Location from the start URL), and a single hop omits the block.
+func TestWriteDebugRedirectChain(t *testing.T) {
+	raw := "HTTP/1.1 301 Moved Permanently\r\nLocation: https://www.example.com/\r\n\r\n" +
+		"HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\n<html>ok</html>"
+	var buf bytes.Buffer
+	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, false, false)
+	out := buf.String()
+	if want := "redirects:\n    https://example.com (301) -> https://www.example.com/ (200)"; !strings.Contains(out, want) {
+		t.Errorf("redirect chain missing %q\n--- got ---\n%s", want, out)
+	}
+
+	// A single-hop response has nothing to chain, so the block is omitted.
+	var single bytes.Buffer
+	writeDebug(&single, []byte("HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\nhi"), debugContext{url: "https://example.com", profile: "chrome_146"}, false, false)
+	if strings.Contains(single.String(), "redirects:") {
+		t.Errorf("single-hop response should omit the redirects block, got:\n%s", single.String())
+	}
+}
+
 // TestWriteDebugStdin checks the stdin source is labeled and no fetch mode leaks in.
 func TestWriteDebugStdin(t *testing.T) {
 	var buf bytes.Buffer

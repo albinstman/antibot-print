@@ -67,11 +67,13 @@ request:
   url:    https://example.com
   mode:   browser (profile chrome_146)
 response:
-  status: 403
+  status: 200
   bytes:  4521
+  redirects:
+    https://example.com (301) -> https://www.example.com/ (200)
 detection (presence):
   cloudflare
-    ← H:cf-mitigated:
+    ← H:set-cookie:__cf_bm=
 ```
 
 Use `-D` to add the normalized view and full raw response:

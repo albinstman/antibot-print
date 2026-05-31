@@ -1,8 +1,8 @@
-// --debug path: instead of just naming vendors, dump a full diagnostic of one
-// response — how it was fetched, the status/redirect chain, every vendor matched
-// in BOTH tiers with the exact text that triggered it, the normalized view the
-// regex actually runs against, and the full raw response. All of it goes to
-// stderr, so stdout stays the clean, pipeable slug list.
+// --debug path: instead of just naming vendors, dump a diagnostic of one
+// response — how it was fetched, the redirect chain, every vendor matched in the
+// active tier with the exact text that triggered it, and (with -D) the normalized
+// view the regex runs against plus the full raw response. It prints to stdout in
+// place of the slug list.
 package main
 
 import (
@@ -10,6 +10,7 @@ import (
 	"io"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -71,9 +72,9 @@ func detectVerbose(norm string, re *regexp.Regexp) []vendorMatch {
 // when challenge is set, presence otherwise — so the diagnostic matches the result.
 //
 // The light report (full == false) is the small, console-friendly half: how the
-// response was fetched, the status chain, and every vendor matched with the exact
-// text that triggered it. The full report adds the two bulky sections — the
-// normalized view and the entire raw response.
+// response was fetched, the status and redirect chain, and every vendor matched
+// with the exact text that triggered it. The full report adds the two bulky
+// sections — the normalized view and the entire raw response.
 func writeDebug(w io.Writer, raw []byte, ctx debugContext, full, challenge bool) {
 	norm := Normalize(raw, DefaultBodyCap)
 
@@ -89,11 +90,15 @@ func writeDebug(w io.Writer, raw []byte, ctx debugContext, full, challenge bool)
 		}
 	}
 
-	chain := "(none)"
-	if s := debugStatusChain(norm); len(s) > 0 {
-		chain = strings.Join(s, " → ")
+	hops := parseHops(raw)
+	status := "(none)"
+	if len(hops) > 0 {
+		status = strconv.Itoa(hops[len(hops)-1].status)
 	}
-	fmt.Fprintf(w, "response:\n  status: %s\n  bytes:  %d\n", chain, len(raw))
+	fmt.Fprintf(w, "response:\n  status: %s\n  bytes:  %d\n", status, len(raw))
+	if len(hops) > 1 {
+		writeRedirectChain(w, hops, ctx)
+	}
 
 	// Report the same tier the run itself uses, so the diagnostic explains the
 	// slugs that follow it rather than a different set.
@@ -149,16 +154,76 @@ func writeDebugTier(w io.Writer, label, norm, regexText string) {
 	}
 }
 
-// debugStatusChain pulls the S:<code> lines out of the normalized view, in order,
-// so the redirect chain shows as e.g. "301 → 302 → 200".
-func debugStatusChain(norm string) []string {
-	var out []string
-	for _, line := range strings.Split(norm, "\n") {
-		if strings.HasPrefix(line, "S:") {
-			out = append(out, line[len("S:"):])
+// redirectHop is one response in the chain: its status and, for a redirect, the
+// Location it pointed at.
+type redirectHop struct {
+	status   int
+	location string
+}
+
+// parseHops walks the raw response chain (curl -i -L style: one status-line block
+// per hop) and returns each hop's status code and Location header, in order.
+func parseHops(raw []byte) []redirectHop {
+	text := strings.ReplaceAll(strings.ReplaceAll(latin1(raw), "\r\n", "\n"), "\r", "\n")
+	lines := strings.Split(text, "\n")
+	var hops []redirectHop
+	for i, n := 0, len(lines); i < n; {
+		if !isStatusLine.MatchString(lines[i]) {
+			i++
+			continue
+		}
+		var h redirectHop
+		if m := statusRe.FindStringSubmatch(lines[i]); m != nil {
+			h.status, _ = strconv.Atoi(m[1])
+		}
+		i++
+		for i < n && lines[i] != "" { // headers until the blank separator
+			if name, val, ok := strings.Cut(lines[i], ":"); ok && strings.EqualFold(strings.TrimSpace(name), "location") {
+				h.location = strings.TrimSpace(val)
+			}
+			i++
+		}
+		hops = append(hops, h)
+		i++                                                // skip blank line
+		for i < n && !isStatusLine.MatchString(lines[i]) { // skip body to next hop
+			i++
 		}
 	}
-	return out
+	return hops
+}
+
+// writeRedirectChain prints the whole chain on one line as
+// "url (status) -> url (status) -> …", each URL beside the status it returned.
+// Direct fetches know the URLs (resolving each Location the way the fetch loop
+// does); piped input doesn't know the start URL, so that hop shows just "(status)"
+// and later hops show the Location targets.
+func writeRedirectChain(w io.Writer, hops []redirectHop, ctx debugContext) {
+	cur := ctx.url
+	if ctx.fromStdin {
+		cur = ""
+	}
+	parts := make([]string, 0, len(hops))
+	for _, h := range hops {
+		if cur != "" {
+			parts = append(parts, fmt.Sprintf("%s (%d)", cur, h.status))
+		} else {
+			parts = append(parts, fmt.Sprintf("(%d)", h.status))
+		}
+		// Advance to the URL the next hop will have.
+		switch {
+		case cur != "" && h.location != "":
+			if r, err := resolveLocation(cur, h.location); err == nil {
+				cur = r
+			} else {
+				cur = ""
+			}
+		case cur == "" && h.location != "": // stdin: next URL is the raw Location
+			cur = h.location
+		default:
+			cur = ""
+		}
+	}
+	fmt.Fprintf(w, "  redirects:\n    %s\n", strings.Join(parts, " -> "))
 }
 
 func debugTruncate(s string, n int) string {
