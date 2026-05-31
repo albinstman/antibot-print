@@ -255,11 +255,14 @@ func Detect(raw []byte, re *regexp.Regexp) []string {
 //
 //	S:<status-code>                     one line per response status
 //	H:<lowercased-header-name>:<value>  one line per header / Set-Cookie
-//	B:<body, newlines flattened, capped at 64 KB>
+//	B:<body, newlines flattened, capped at DefaultBodyCap>
 // ---------------------------------------------------------------------------
 
-// DefaultBodyCap caps the body so scanning stays linear-time and ^B: anchors cleanly.
-const DefaultBodyCap = 64 * 1024 // 64 KB
+// DefaultBodyCap bounds how much of the body the regex scans. Go's regexp is RE2
+// (linear-time) and fetch already holds the whole body in memory, so this is set
+// generously — high enough to reach widgets/scripts planted deep in large pages —
+// while still capping work on a pathologically large response.
+const DefaultBodyCap = 8 * 1024 * 1024 // 8 MB
 
 var (
 	statusRe      = regexp.MustCompile(`HTTP/[\d.]+\s+(\d{3})`)

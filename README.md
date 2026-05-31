@@ -130,8 +130,8 @@ func normalize(raw []byte) string {
 			out = append(out, "H:"+strings.ToLower(strings.TrimSpace(k))+":"+strings.TrimSpace(v))
 		}
 	}
-	if len(body) > 65536 {
-		body = body[:65536]
+	if len(body) > 8*1024*1024 {
+		body = body[:8*1024*1024]
 	}
 	out = append(out, "B:"+strings.NewReplacer("\n", " ", "\t", " ").Replace(body))
 	return strings.Join(out, "\n")
@@ -165,7 +165,7 @@ func main() {
 ```python
 import re, urllib.request, urllib.error  # or: import re2 as re
 
-def normalize(raw, cap=65536):
+def normalize(raw, cap=8 * 1024 * 1024):
     text = raw.decode("latin-1").replace("\r\n", "\n").replace("\r", "\n")
     head, _, body = text.partition("\n\n")
     lines = head.split("\n")
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 ```js
 import fs from "node:fs";
 
-function normalize(raw, cap = 65536) {
+function normalize(raw, cap = 8 * 1024 * 1024) {
   const text = Buffer.from(raw).toString("latin1").replace(/\r\n|\r/g, "\n");
   const i = text.indexOf("\n\n");
   const [head, body] = i < 0 ? [text, ""] : [text.slice(0, i), text.slice(i + 2)];
