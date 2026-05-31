@@ -59,6 +59,27 @@ $ antibot -p firefox_135 https://example.com
 cloudflare
 ```
 
+Add `-d` for diagnostics:
+
+```console
+$ antibot -d https://example.com
+request:
+  url:    https://example.com
+  mode:   browser (profile chrome_146)
+response:
+  status: 403
+  bytes:  4521
+detection (presence):
+  cloudflare
+    ← H:cf-mitigated:
+```
+
+Use `-D` to add the normalized view and full raw response:
+
+```console
+$ antibot -D https://example.com > debug.txt
+```
+
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
 
 > **Tip:** the two fingerprints answer different questions. The default browser fetch
@@ -222,6 +243,7 @@ the reference (redirect chains, byte handling).
 signatures/<vendor>.json   source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
 main.go                    normalize, compile, detect; embeds the regexes
 fetch.go                   direct-fetch path: browser-fingerprinted HTTP via tls-client
+debug.go                   `--debug` diagnostic report (request, detection, raw response)
 update.go                  `antibot update` + throttled "update available" notifier
 main_test.go               smoke tests + artifact-sync guard
 fetch_test.go              fetch helpers: redirect/Location/header-order tests

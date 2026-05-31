@@ -48,6 +48,16 @@ $ antibot -p firefox_135 https://example.com
 cloudflare
 ```
 
+Add `-d` to diagnose why a result looks wrong: a light report replaces the slug list with
+the fetch mode, status chain, and each vendor matched in the active tier (respects `-c`) plus
+the exact text that triggered it. Use `-D` to also include the normalized view and full raw
+response — large, so redirect it to a file:
+
+```console
+$ antibot -d https://example.com
+$ antibot -D https://example.com > debug.txt
+```
+
 `-n` and `-p` are mutually exclusive. Exit status is `0` if any vendor was detected, `1` if
 none (a valid result, not a failure), `2` on error.
 
