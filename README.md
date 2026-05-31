@@ -41,6 +41,7 @@ presence:
 
 ```console
 $ antibot -c https://example.com
+cloudflare
 ```
 
 Add `-n` to fetch with Go's default fingerprint. Surfaces
@@ -64,23 +65,18 @@ To run the regex yourself instead of the binary, see [Language integration](#lan
 > shows what a real browser gets served. `-n` shows what an obvious bot gets served.
 > Some vendors only reveal themselves to one or the other. When in doubt, run both.
 
-## Updating
-
-Update to the latest release (downloads the matching binary and verifies its checksum
-before replacing itself):
+Update to the latest release:
 
 ```console
 $ antibot update
 antibot: updated abc1234 → def5678
 ```
 
-When stderr is a terminal, antibot checks for a newer build at most once a day and
-prints a one-line hint — it never updates on its own. The check is silent when piped or
-in CI, and you can disable it entirely:
+## Agent skill
 
-```sh
-export ANTIBOT_NO_UPDATE_CHECK=1
-```
+[`SKILL.md`](SKILL.md) is an [agent skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
+that teaches a coding agent (e.g. Claude Code) to use `antibot`. To install it, paste
+[`install-skill.md`](install-skill.md) to your agent.
 
 ## Language integration
 
