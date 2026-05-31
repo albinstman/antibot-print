@@ -7,10 +7,13 @@
     "H:set-cookie:nlbi_",
     "H:set-cookie:reese84=",
     "H:set-cookie:___utmvc=",
-    "H:x-iinfo:",
-    "H:x-cdn:(?i:Incapsula)",
     "B:.*/_Incapsula_Resource\\?",
+    "B:.*/_Incapsula_Resource\\?[^\"']*incident_id=",
     "B:.*Incapsula incident ID",
     "B:.*window\\._Incapsula"
+  ],
+  "challenge": [
+    "B:.*/_Incapsula_Resource\\?[^\"']*incident_id=",
+    "B:.*Incapsula incident ID"
   ]
 }

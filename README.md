@@ -27,6 +27,14 @@ $ curl -isS https://example.com | antibot-print
 cloudflare
 ```
 
+Add `-c` to report only vendors **actively serving a challenge or
+block** in this response (a captcha/interstitial/JS-challenge), rather than mere
+vendor presence (tracking cookies, sensor scripts).
+
+```console
+$ curl -isS https://example.com | antibot-print -c
+```
+
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
 
 > **Tip:** the tool only sees what's in the response you give it. Evasion-aware WAFs
@@ -175,25 +183,30 @@ the reference (redirect chains, byte handling).
 ## Project structure
 
 ```
-signatures/<vendor>.json   source of truth: {vendor, signals:[RE2 patterns]}
-main.go                    normalize, compile, detect; embeds the regex
+signatures/<vendor>.json   source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
+main.go                    normalize, compile, detect; embeds the regexes
 main_test.go               smoke tests + artifact-sync guard
-antibot.re2.txt            the compiled regex (embedded in the binary, usable standalone)
+antibot.re2.txt            compiled presence regex (embedded, usable standalone)
+antibot-challenge.re2.txt  compiled challenge-only regex (embedded, usable standalone)
 install.sh                 curl | bash installer (downloads a release binary)
 .github/workflows/release.yml   build 5 platforms on push to main -> rolling "latest" release
 ```
 
+The optional `challenge` array is the subset of `signals` that indicates an active
+challenge/block (it powers `--challenge`); compile fails if any challenge entry is
+not also in `signals`.
+
 ## Build from source
 
 ```sh
-go build -o antibot-print .   # embeds antibot.re2.txt
+go build -o antibot-print .   # embeds antibot.re2.txt + antibot-challenge.re2.txt
 go test ./...                 # smoke tests + artifact-sync check
-go run . compile              # regenerate antibot.re2.txt from signatures/
+go run . compile              # regenerate both .re2.txt artifacts from signatures/
 ```
 
 To add or change a vendor, edit a `signatures/<vendor>.json` (each signal prefixed
 `S:`/`H:`/`B:`, valid RE2, vendor-specific) and run `go run . compile`. Pushing to
-`main` recompiles the regex and rebuilds every platform binary into the rolling
+`main` recompiles the regexes and rebuilds every platform binary into the rolling
 **latest** release, so the signature files are the only thing you maintain.
 
 ## Roadmap

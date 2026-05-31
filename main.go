@@ -22,6 +22,9 @@ var version = "dev"
 //go:embed antibot.re2.txt
 var embeddedRegex string
 
+//go:embed antibot-challenge.re2.txt
+var embeddedChallengeRegex string
+
 const usage = `antibot-print — name the antibot/WAF/CAPTCHA vendor(s) protecting a site,
 from a static HTTP response read on stdin.
 
@@ -31,13 +34,16 @@ Usage:
 Prints one detected vendor slug per line (sorted). Exit status 0 if any vendor was
 detected, 1 if none. Use 'curl -isS -L --compressed' to follow redirects/decompress.
 
-Commands:
-  compile [--dir signatures] [--out antibot.re2.txt]
-                   regenerate the regex artifact from signature files (dev/CI)
-
 Options:
+  -c, --challenge  only report vendors actively serving a challenge/block,
+                   not mere vendor presence
   -h, --help       show this help and exit
   -V, --version    show version and exit
+
+Commands:
+  compile [--dir signatures] [--out antibot.re2.txt]
+          [--challenge-out antibot-challenge.re2.txt]
+                   regenerate the regex artifacts from signature files (dev/CI)
 `
 
 func main() {
@@ -52,16 +58,18 @@ func main() {
 		case "-V", "--version":
 			fmt.Printf("antibot-print %s\n", version)
 			return
+		case "-c", "--challenge":
+			os.Exit(runDetect(embeddedChallengeRegex))
 		default:
 			fmt.Fprintf(os.Stderr, "antibot-print: unknown argument %q (try --help)\n", args[0])
 			os.Exit(2)
 		}
 	}
-	os.Exit(runDetect())
+	os.Exit(runDetect(embeddedRegex))
 }
 
-func runDetect() int {
-	re, err := regexp.Compile(strings.TrimSpace(embeddedRegex))
+func runDetect(regexText string) int {
+	re, err := regexp.Compile(strings.TrimSpace(regexText))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot-print: embedded regex is invalid: %v\n", err)
 		return 2
@@ -82,7 +90,7 @@ func runDetect() int {
 }
 
 func runCompile(args []string) int {
-	dir, out := "signatures", "antibot.re2.txt"
+	dir, out, chOut := "signatures", "antibot.re2.txt", "antibot-challenge.re2.txt"
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--dir":
@@ -95,6 +103,11 @@ func runCompile(args []string) int {
 			if i < len(args) {
 				out = args[i]
 			}
+		case "--challenge-out":
+			i++
+			if i < len(args) {
+				chOut = args[i]
+			}
 		default:
 			fmt.Fprintf(os.Stderr, "compile: unknown argument %q\n", args[i])
 			return 2
@@ -106,6 +119,12 @@ func runCompile(args []string) int {
 		return 1
 	}
 	fmt.Fprintf(os.Stderr, "compile: wrote %s (%d bytes)\n", out, len(pattern))
+	chPattern, err := CompileChallengeSignatures(dir, chOut)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "compile: %v\n", err)
+		return 1
+	}
+	fmt.Fprintf(os.Stderr, "compile: wrote %s (%d bytes)\n", chOut, len(chPattern))
 	return 0
 }
 
@@ -219,9 +238,12 @@ func latin1(b []byte) string {
 // ---------------------------------------------------------------------------
 
 // Signature is one vendor's source-of-truth file: signatures/<vendor>.json.
+// Challenge is the subset of Signals that indicates an active challenge/block
+// (not mere vendor presence); it compiles into a separate regex artifact.
 type Signature struct {
-	Vendor  string   `json:"vendor"`
-	Signals []string `json:"signals"`
+	Vendor    string   `json:"vendor"`
+	Signals   []string `json:"signals"`
+	Challenge []string `json:"challenge,omitempty"`
 }
 
 var (
@@ -240,6 +262,26 @@ func CompileSignatures(dir, outPath string) (string, error) {
 	pattern := buildRegex(sigs)
 	if _, err := regexp.Compile(pattern); err != nil { // the artifact must itself be valid RE2
 		return "", fmt.Errorf("assembled regex is invalid: %w", err)
+	}
+	if outPath != "" {
+		if err := os.WriteFile(outPath, []byte(pattern+"\n"), 0o644); err != nil {
+			return "", err
+		}
+	}
+	return pattern, nil
+}
+
+// CompileChallengeSignatures is CompileSignatures for the challenge-only tier:
+// it validates dir, builds the challenge-subset regex, verifies it, and (when
+// outPath != "") writes it. Returns the pattern.
+func CompileChallengeSignatures(dir, outPath string) (string, error) {
+	sigs, err := loadSignatures(dir)
+	if err != nil {
+		return "", err
+	}
+	pattern := buildChallengeRegex(sigs)
+	if _, err := regexp.Compile(pattern); err != nil { // the artifact must itself be valid RE2
+		return "", fmt.Errorf("assembled challenge regex is invalid: %w", err)
 	}
 	if outPath != "" {
 		if err := os.WriteFile(outPath, []byte(pattern+"\n"), 0o644); err != nil {
@@ -306,6 +348,17 @@ func validateFile(path string) (Signature, error) {
 			return s, fmt.Errorf("%s: signal is not valid RE2: %q: %w", name, sig, err)
 		}
 	}
+	// Every challenge entry must be one of the (already-validated) signals, so the
+	// challenge tier is a strict subset of presence and inherits its validation.
+	sigSet := make(map[string]bool, len(s.Signals))
+	for _, sig := range s.Signals {
+		sigSet[sig] = true
+	}
+	for _, sig := range s.Challenge {
+		if !sigSet[sig] {
+			return s, fmt.Errorf("%s: challenge signal %q is not in 'signals' (challenge must be a subset)", name, sig)
+		}
+	}
 	return s, nil
 }
 
@@ -318,21 +371,40 @@ func hasSigPrefix(sig string) bool {
 	return false
 }
 
-// buildRegex assembles the single multiline RE2 pattern. S:/H: signals are
-// line-anchored for context precision; B: signals match a minimal span anywhere so
-// one finditer pass reports every body-only vendor present.
+// vendorGroup builds one named alternation group for a vendor's pattern list.
+// S:/H: signals are line-anchored for context precision; B: signals match a
+// minimal span anywhere so one finditer pass reports every body-only vendor.
+func vendorGroup(vendor string, sigs []string) string {
+	alts := make([]string, len(sigs))
+	for j, sig := range sigs {
+		if strings.HasPrefix(sig, "B:") {
+			alts[j] = "(?:" + leadingDotRun.ReplaceAllString(sig[2:], "") + ")"
+		} else {
+			alts[j] = "^(?:" + sig + ")"
+		}
+	}
+	return "(?P<" + vendor + ">" + strings.Join(alts, "|") + ")"
+}
+
+// buildRegex assembles the single multiline RE2 pattern over every vendor's full
+// presence signal set.
 func buildRegex(sigs []Signature) string {
 	groups := make([]string, len(sigs))
 	for i, s := range sigs {
-		alts := make([]string, len(s.Signals))
-		for j, sig := range s.Signals {
-			if strings.HasPrefix(sig, "B:") {
-				alts[j] = "(?:" + leadingDotRun.ReplaceAllString(sig[2:], "") + ")"
-			} else {
-				alts[j] = "^(?:" + sig + ")"
-			}
+		groups[i] = vendorGroup(s.Vendor, s.Signals)
+	}
+	return "(?m)" + strings.Join(groups, "|")
+}
+
+// buildChallengeRegex assembles the multiline RE2 pattern over only the challenge
+// subset, skipping vendors that declare no challenge signals.
+func buildChallengeRegex(sigs []Signature) string {
+	groups := make([]string, 0, len(sigs))
+	for _, s := range sigs {
+		if len(s.Challenge) == 0 {
+			continue
 		}
-		groups[i] = "(?P<" + s.Vendor + ">" + strings.Join(alts, "|") + ")"
+		groups = append(groups, vendorGroup(s.Vendor, s.Challenge))
 	}
 	return "(?m)" + strings.Join(groups, "|")
 }
