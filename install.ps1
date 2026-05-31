@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-  antibot-print installer for Windows.
+  antibot installer for Windows.
 
 .DESCRIPTION
-  Downloads the prebuilt antibot-print.exe from the latest release, verifies its
+  Downloads the prebuilt antibot.exe from the latest release, verifies its
   SHA-256 checksum, installs it, and adds the install directory to your user PATH.
 
     irm https://raw.githubusercontent.com/albinstman/antibot-print/main/install.ps1 | iex
 
   Override defaults with environment variables before running:
-    $env:ANTIBOT_BIN_DIR = "C:\tools\antibot-print"   # install location
+    $env:ANTIBOT_BIN_DIR = "C:\tools\antibot"   # install location
     $env:ANTIBOT_REF     = "v1.2.3"                     # release tag (default: latest)
     $env:ANTIBOT_REPO    = "owner/name"                 # source repo
 #>
@@ -18,7 +18,7 @@ $ErrorActionPreference = "Stop"
 
 $repo   = if ($env:ANTIBOT_REPO)    { $env:ANTIBOT_REPO }    else { "albinstman/antibot-print" }
 $ref    = if ($env:ANTIBOT_REF)     { $env:ANTIBOT_REF }     else { "latest" }
-$binDir = if ($env:ANTIBOT_BIN_DIR) { $env:ANTIBOT_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "antibot-print" }
+$binDir = if ($env:ANTIBOT_BIN_DIR) { $env:ANTIBOT_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "antibot" }
 
 function Info($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 function Ok($m)   { Write-Host "OK  $m"  -ForegroundColor Green }
@@ -30,7 +30,7 @@ $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToSt
 if ($arch -eq "Arm64") {
   Write-Host "note: no native ARM64 build; using amd64 (runs under Windows emulation)." -ForegroundColor Yellow
 }
-$asset = "antibot-print-windows-amd64.exe"
+$asset = "antibot-windows-amd64.exe"
 
 if ($ref -eq "latest") {
   $base = "https://github.com/$repo/releases/latest/download"
@@ -38,7 +38,7 @@ if ($ref -eq "latest") {
   $base = "https://github.com/$repo/releases/download/$ref"
 }
 
-$tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("antibot-print-" + [System.Guid]::NewGuid().ToString("N"))
+$tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("antibot-" + [System.Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 try {
   $exe  = Join-Path $tmp $asset
@@ -59,11 +59,11 @@ try {
 
   # --- self-test, then install ----------------------------------------------
   Info "Verifying it runs"
-  $out = "HTTP/1.1 403`r`nServer: cloudflare`r`n`r`n" | & $exe
+  $out = "HTTP/1.1 403`r`nSet-Cookie: __cf_bm=x; path=/`r`n`r`n" | & $exe
   if ($out -notcontains "cloudflare") { Die "self-test failed (did not detect a Cloudflare response)." }
 
   New-Item -ItemType Directory -Path $binDir -Force | Out-Null
-  $dest = Join-Path $binDir "antibot-print.exe"
+  $dest = Join-Path $binDir "antibot.exe"
   Copy-Item -Path $exe -Destination $dest -Force
   Ok ("Installed " + (& $dest --version) + " -> $dest")
 }
@@ -80,6 +80,14 @@ if (($userPath -split ';') -notcontains $binDir) {
   Write-Host "Added $binDir to your user PATH. Open a new terminal to pick it up." -ForegroundColor Yellow
 }
 
+# The command was renamed antibot-print -> antibot, and so was the install dir.
+# Flag the old install (binary + lingering PATH entry) so the user can clean it up.
+$oldDir = Join-Path $env:LOCALAPPDATA "antibot-print"
+if (Test-Path (Join-Path $oldDir "antibot-print.exe")) {
+  Write-Host "Note: an old 'antibot-print' install remains at $oldDir; the command is now 'antibot'." -ForegroundColor Yellow
+  Write-Host "      Remove it with: Remove-Item -Recurse '$oldDir'  (and drop that folder from your PATH)." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Try it (PowerShell):" -ForegroundColor Cyan
-Write-Host '    curl.exe -isS https://example.com | antibot-print'
+Write-Host '    curl.exe -isS https://example.com | antibot'

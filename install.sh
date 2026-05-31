@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# antibot-print installer — downloads a prebuilt binary (no dependencies needed).
+# antibot installer — downloads a prebuilt binary (no dependencies needed).
 #
 #   curl -fsSL https://raw.githubusercontent.com/albinstman/antibot-print/main/install.sh | bash
 #
@@ -32,7 +32,7 @@ os="$(uname -s)"
 case "$os" in
   Linux)  os=linux ;;
   Darwin) os=darwin ;;
-  *) die "unsupported OS '$os'. Windows users: download antibot-print-windows-amd64.exe from
+  *) die "unsupported OS '$os'. Windows users: download antibot-windows-amd64.exe from
      https://github.com/${REPO}/releases/${REF}" ;;
 esac
 arch="$(uname -m)"
@@ -46,7 +46,7 @@ if [ "$os" = "darwin" ] && [ "$arch" = "amd64" ] \
    && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = "1" ]; then
   arch=arm64
 fi
-asset="antibot-print-${os}-${arch}"
+asset="antibot-${os}-${arch}"
 
 if [ "$REF" = "latest" ]; then
   base="https://github.com/${REPO}/releases/latest/download"
@@ -63,7 +63,7 @@ else
   die "need either curl or wget to download."
 fi
 
-tmp="$(mktemp -d "${TMPDIR:-/tmp}/antibot-print.XXXXXX")"
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/antibot.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT
 
 info "Downloading ${asset} (${REPO}@${REF})"
@@ -87,11 +87,11 @@ expected="$(awk -v f="$asset" '$2 == f || $2 == "*"f {print $1}' "$tmp/SHA256SUM
 # --- self-test, then install -------------------------------------------------
 chmod +x "$tmp/$asset"
 info "Verifying it runs"
-printf 'HTTP/1.1 403\r\nServer: cloudflare\r\n\r\n' | "$tmp/$asset" 2>/dev/null \
+printf 'HTTP/1.1 403\r\nSet-Cookie: __cf_bm=x; path=/\r\n\r\n' | "$tmp/$asset" 2>/dev/null \
   | grep -qx cloudflare || die "self-test failed (the binary did not detect a Cloudflare response)."
 
 mkdir -p "$BIN_DIR" || die "cannot create $BIN_DIR"
-dest="$BIN_DIR/antibot-print"
+dest="$BIN_DIR/antibot"
 cp "$tmp/$asset" "$dest" && chmod 0755 "$dest" || die "cannot write $dest"
 ok "Installed $("$dest" --version) -> $dest"
 
@@ -101,8 +101,14 @@ case ":$PATH:" in
      printf '\n    export PATH="%s:$PATH"\n' "$BIN_DIR" >&2 ;;
 esac
 
+# The command was renamed antibot-print -> antibot; flag a leftover old binary.
+if [ -e "$BIN_DIR/antibot-print" ]; then
+  warn "An old 'antibot-print' binary remains in $BIN_DIR — the command is now 'antibot'."
+  printf "    Remove the stale binary with: rm '%s/antibot-print'\n" "$BIN_DIR" >&2
+fi
+
 cat >&2 <<EOF
 
 Try it:
-    curl -isS https://example.com | antibot-print
+    curl -isS https://example.com | antibot
 EOF

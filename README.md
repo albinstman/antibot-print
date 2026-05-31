@@ -1,4 +1,4 @@
-# antibot-print
+# antibot
 
 Print the antibot vendors protecting a site by matching its HTTP response against a
 single [regex](antibot.re2.txt).
@@ -18,29 +18,69 @@ irm https://raw.githubusercontent.com/albinstman/antibot-print/main/install.ps1 
 ```
 
 > **macOS:** binaries are unsigned — clear the quarantine flag once with
-> `xattr -d com.apple.quarantine ~/.local/bin/antibot-print`.
+> `xattr -d com.apple.quarantine ~/.local/bin/antibot`.
 
 ## Usage
 
+Print vendors:
+
 ```console
-$ curl -isS https://example.com | antibot-print
+$ antibot https://example.com
 cloudflare
 ```
 
-Add `-c` to report only vendors **actively serving a challenge or
-block** in this response (a captcha/interstitial/JS-challenge), rather than mere
-vendor presence (tracking cookies, sensor scripts).
+Or pipe response from curl:
 
 ```console
-$ curl -isS https://example.com | antibot-print -c
+$ curl -isS https://example.com | antibot
+cloudflare
+```
+
+Add `-c` to report only vendors actively serving a challenge or block, not mere
+presence:
+
+```console
+$ antibot -c https://example.com
+```
+
+Add `-n` to fetch with Go's default fingerprint. Surfaces
+vendors that challenge bots but pass real browsers:
+
+```console
+$ antibot -n https://example.com
+perimeterx
+```
+
+Use `-p` to impersonate a different browser (e.g. `chrome_133`, `firefox_135`):
+
+```console
+$ antibot -p firefox_135 https://example.com
+cloudflare
 ```
 
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
 
-> **Tip:** the tool only sees what's in the response you give it. Evasion-aware WAFs
-> (Akamai, DataDome, …) reveal their cookies/scripts only to requests that look like a
-> real browser — send browser headers, and ideally a browser TLS fingerprint
-> (see [Roadmap](#roadmap)).
+> **Tip:** the two fingerprints answer different questions. The default browser fetch
+> shows what a real browser gets served. `-n` shows what an obvious bot gets served.
+> Some vendors only reveal themselves to one or the other. When in doubt, run both.
+
+## Updating
+
+Update to the latest release (downloads the matching binary and verifies its checksum
+before replacing itself):
+
+```console
+$ antibot update
+antibot: updated abc1234 → def5678
+```
+
+When stderr is a terminal, antibot checks for a newer build at most once a day and
+prints a one-line hint — it never updates on its own. The check is silent when piped or
+in CI, and you can disable it entirely:
+
+```sh
+export ANTIBOT_NO_UPDATE_CHECK=1
+```
 
 ## Language integration
 
@@ -124,7 +164,7 @@ def normalize(raw, cap=65536):
     return "\n".join(out)
 
 def main(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "antibot-print"})
+    req = urllib.request.Request(url, headers={"User-Agent": "antibot"})
     try:
         r = urllib.request.urlopen(req)
     except urllib.error.HTTPError as e:
@@ -185,7 +225,11 @@ the reference (redirect chains, byte handling).
 ```
 signatures/<vendor>.json   source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
 main.go                    normalize, compile, detect; embeds the regexes
+fetch.go                   direct-fetch path: browser-fingerprinted HTTP via tls-client
+update.go                  `antibot update` + throttled "update available" notifier
 main_test.go               smoke tests + artifact-sync guard
+fetch_test.go              fetch helpers: redirect/Location/header-order tests
+update_test.go             update helpers: asset name / checksum parsing tests
 antibot.re2.txt            compiled presence regex (embedded, usable standalone)
 antibot-challenge.re2.txt  compiled challenge-only regex (embedded, usable standalone)
 install.sh                 curl | bash installer (downloads a release binary)
@@ -199,31 +243,15 @@ not also in `signals`.
 ## Build from source
 
 ```sh
-go build -o antibot-print .   # embeds antibot.re2.txt + antibot-challenge.re2.txt
-go test ./...                 # smoke tests + artifact-sync check
-go run . compile              # regenerate both .re2.txt artifacts from signatures/
+go build -o antibot .   # embeds antibot.re2.txt + antibot-challenge.re2.txt
+go test ./...           # smoke tests + artifact-sync check
+go run . compile        # regenerate both .re2.txt artifacts from signatures/
 ```
 
 To add or change a vendor, edit a `signatures/<vendor>.json` (each signal prefixed
 `S:`/`H:`/`B:`, valid RE2, vendor-specific) and run `go run . compile`. Pushing to
 `main` recompiles the regexes and rebuilds every platform binary into the rolling
 **latest** release, so the signature files are the only thing you maintain.
-
-## Roadmap
-
-- [ ] **Fetch the URL directly** — `antibot-print https://example.com` instead of
-  piping `curl`, sending a browser-like TLS/HTTP-2 fingerprint and header set so
-  evasion-aware WAFs actually reveal themselves. In Go this means an impersonating
-  client such as [`bogdanfinn/tls-client`](https://github.com/bogdanfinn/tls-client)
-  or [`utls`](https://github.com/refraction-networking/utls); the alternative is to
-  keep piping from a TLS-impersonating fetcher
-  ([`curl_cffi`](https://github.com/lexiforest/curl_cffi) in Python, or the
-  [`lexiforest/curl-impersonate`](https://github.com/lexiforest/curl-impersonate) CLI).
-- [ ] **Audit the signals** — keep only signals that indicate an actual antibot
-  *challenge*, not mere CDN/vendor presence (e.g. an Akamai-accelerated site not
-  running Bot Manager, or generic Google session cookies). Prefer high-confidence,
-  challenge-specific signals even when the regex gets gnarly — like the Akamai
-  script-endpoint pattern `B:<script[^>]*\bsrc="/(?:[a-zA-Z0-9_-]+/){5,}[a-zA-Z0-9_-]*[A-Z][a-zA-Z0-9_/-]*"`.
 
 ## License
 

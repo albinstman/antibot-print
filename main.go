@@ -1,4 +1,4 @@
-// Command antibot-print names the antibot/WAF/CAPTCHA vendor(s) protecting a site
+// Command antibot names the antibot/WAF/CAPTCHA vendor(s) protecting a site
 // from a static HTTP response read on stdin. It is a single self-contained binary:
 // the compiled regex is embedded, and Go's stdlib regexp IS RE2 (linear-time, no
 // backreferences/lookaround), so nothing else is bundled or required at runtime.
@@ -25,25 +25,37 @@ var embeddedRegex string
 //go:embed antibot-challenge.re2.txt
 var embeddedChallengeRegex string
 
-const usage = `antibot-print — name the antibot/WAF/CAPTCHA vendor(s) protecting a site,
-from a static HTTP response read on stdin.
+const usage = `antibot — name the antibot/WAF/CAPTCHA vendor(s) protecting a site.
 
 Usage:
-  curl -isS https://example.com | antibot-print
+  antibot https://example.com        fetch the URL directly (browser fingerprint)
+  curl -isS https://example.com | antibot   detect from a piped HTTP response
 
 Prints one detected vendor slug per line (sorted). Exit status 0 if any vendor was
-detected, 1 if none. Use 'curl -isS -L --compressed' to follow redirects/decompress.
+detected, 1 if none. When fetching directly, antibot sends a browser-like
+TLS/HTTP-2 fingerprint and header set and follows redirects, so evasion-aware WAFs
+reveal themselves. When piping, use 'curl -isS -L --compressed' to follow
+redirects/decompress.
 
 Options:
-  -c, --challenge  only report vendors actively serving a challenge/block,
-                   not mere vendor presence
-  -h, --help       show this help and exit
-  -V, --version    show version and exit
+  -c, --challenge   only report vendors actively serving a challenge/block,
+                    not mere vendor presence
+  -p, --profile P   tls-client browser profile to impersonate when fetching a URL
+                    (default %s; e.g. chrome_133, firefox_135)
+  -n, --naive       fetch with Go's default (non-browser) TLS/HTTP fingerprint
+                    instead of impersonating a browser — surfaces vendors that
+                    challenge suspicious clients but pass real browsers silently
+  -h, --help        show this help and exit
+  -V, --version     show version and exit
 
 Commands:
+  update            download and install the latest release (verifies checksum)
   compile [--dir signatures] [--out antibot.re2.txt]
           [--challenge-out antibot-challenge.re2.txt]
-                   regenerate the regex artifacts from signature files (dev/CI)
+                    regenerate the regex artifacts from signature files (dev/CI)
+
+Environment:
+  ANTIBOT_NO_UPDATE_CHECK   disable the daily "update available" check
 `
 
 func main() {
@@ -52,31 +64,92 @@ func main() {
 		switch args[0] {
 		case "compile":
 			os.Exit(runCompile(args[1:]))
-		case "-h", "--help":
-			fmt.Print(usage)
-			return
-		case "-V", "--version":
-			fmt.Printf("antibot-print %s\n", version)
-			return
-		case "-c", "--challenge":
-			os.Exit(runDetect(embeddedChallengeRegex))
-		default:
-			fmt.Fprintf(os.Stderr, "antibot-print: unknown argument %q (try --help)\n", args[0])
-			os.Exit(2)
+		case "update":
+			os.Exit(runUpdate())
 		}
 	}
-	os.Exit(runDetect(embeddedRegex))
+
+	challenge := false
+	naive := false
+	profile := defaultProfile
+	profileSet := false
+	url := ""
+	for i := 0; i < len(args); i++ {
+		switch a := args[i]; {
+		case a == "-h" || a == "--help":
+			fmt.Printf(usage, defaultProfile)
+			return
+		case a == "-V" || a == "--version":
+			fmt.Printf("antibot %s\n", version)
+			return
+		case a == "-c" || a == "--challenge":
+			challenge = true
+		case a == "-n" || a == "--naive":
+			naive = true
+		case a == "-p" || a == "--profile":
+			i++
+			if i >= len(args) {
+				fmt.Fprintln(os.Stderr, "antibot: --profile requires a value")
+				os.Exit(2)
+			}
+			profile = args[i]
+			profileSet = true
+		case strings.HasPrefix(a, "-") && a != "-":
+			fmt.Fprintf(os.Stderr, "antibot: unknown option %q (try --help)\n", a)
+			os.Exit(2)
+		default:
+			if url != "" {
+				fmt.Fprintf(os.Stderr, "antibot: unexpected extra argument %q\n", a)
+				os.Exit(2)
+			}
+			url = a
+		}
+	}
+	if naive && profileSet {
+		fmt.Fprintln(os.Stderr, "antibot: --naive and --profile are mutually exclusive")
+		os.Exit(2)
+	}
+
+	regexText := embeddedRegex
+	if challenge {
+		regexText = embeddedChallengeRegex
+	}
+	var code int
+	if url != "" {
+		code = runFetch(url, profile, naive, regexText)
+	} else {
+		code = runDetect(regexText)
+	}
+	maybeNotifyUpdate() // throttled, TTY-only; prints after results, never blocks output
+	os.Exit(code)
 }
 
 func runDetect(regexText string) int {
-	re, err := regexp.Compile(strings.TrimSpace(regexText))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "antibot-print: embedded regex is invalid: %v\n", err)
-		return 2
-	}
 	raw, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "antibot-print: reading stdin: %v\n", err)
+		fmt.Fprintf(os.Stderr, "antibot: reading stdin: %v\n", err)
+		return 2
+	}
+	return detect(raw, regexText)
+}
+
+// runFetch retrieves url directly (browser fingerprint, or Go's default when naive),
+// then detects on the captured response chain.
+func runFetch(url, profile string, naive bool, regexText string) int {
+	raw, err := fetch(url, profile, naive)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "antibot: %v\n", err)
+		return 2
+	}
+	return detect(raw, regexText)
+}
+
+// detect compiles regexText, runs it over raw, prints the sorted vendor slugs, and
+// returns the process exit code (0 = at least one hit, 1 = none, 2 = bad regex).
+func detect(raw []byte, regexText string) int {
+	re, err := regexp.Compile(strings.TrimSpace(regexText))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "antibot: embedded regex is invalid: %v\n", err)
 		return 2
 	}
 	hits := Detect(raw, re)

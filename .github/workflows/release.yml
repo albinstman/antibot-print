@@ -36,12 +36,13 @@ jobs:
           targets="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64"
           for t in $targets; do
             os="${t%/*}"; arch="${t#*/}"
-            out="dist/antibot-print-${os}-${arch}"
+            out="dist/antibot-${os}-${arch}"
             [ "$os" = "windows" ] && out="${out}.exe"
             echo "building $out"
             GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
               go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "$out" .
           done
+          printf '%s' "$VERSION" > dist/VERSION   # tiny asset the update-checker polls
           ( cd dist && sha256sum * > SHA256SUMS )
           ls -l dist
 
