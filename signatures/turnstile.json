@@ -1,0 +1,10 @@
+{
+  "vendor": "turnstile",
+  "signals": [
+    "B:.*\\bchallenges\\.cloudflare\\.com/turnstile/",
+    "B:.*\\bclass=[\"']?[^\"'>]*\\bcf-turnstile\\b",
+    "B:.*\\bdata-sitekey\\b[^>]*\\bcf-turnstile\\b",
+    "B:.*\\bcf-turnstile\\b[^>]*\\bdata-sitekey\\b",
+    "B:.*\\bturnstile\\.(?:render|execute|reset|remove|getResponse)\\b"
+  ]
+}
