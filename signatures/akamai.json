@@ -36,7 +36,6 @@
     "B:.*\\bsec-cp-challenge\\b",
     "B:.*\\bsec-bc-tile-container\\b",
     "B:.*\\bscf-akamai-logo\\b",
-    "B:.*\\bbazadebezolkohpepadr\\b",
     "B:.*Reference #\\d+\\.[0-9a-f]+\\.\\d+\\.[0-9a-f]+",
     "B:<script[^>]*\\bsrc=\"/(?:[a-zA-Z0-9_-]{2,30}/){2,}[a-zA-Z0-9_-]{2,30}\\?v=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}&(?:amp;)?t=\\d"
   ]
