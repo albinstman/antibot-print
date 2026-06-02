@@ -7,6 +7,7 @@
     "H:set-cookie:sec_cpt=",
     "H:set-cookie:ak_bmsc=",
     "H:set-cookie:bm_sz=",
+    "H:set-cookie:bm_so=",
     "H:set-cookie:bm_sv=",
     "H:set-cookie:bm_mi=",
     "B:.*/akam/",
@@ -14,10 +15,14 @@
     "B:.*/\\.well-known/sbsd/",
     "B:.*/_sec/cp_challenge/",
     "B:.*\\bid=\"sec-cpt-if\"",
+    "B:.*\\bid=\"sec-if-cpt-container\"",
     "B:.*\\bsec-cp-challenge\\b",
+    "B:.*\\bsec-bc-tile-container\\b",
+    "B:.*\\bscf-akamai-logo\\b",
     "B:.*\\bbazadebezolkohpepadr\\b",
     "B:.*Reference #\\d+\\.[0-9a-f]+\\.\\d+\\.[0-9a-f]+",
-    "B:<script[^>]*\\bsrc=\"/(?:[a-zA-Z0-9_-]{2,30}/){4,}[a-zA-Z0-9_-]{2,30}\""
+    "B:<script[^>]*\\bsrc=\"/(?:[a-zA-Z0-9_-]{2,30}/){4,}[a-zA-Z0-9_-]{2,30}\"",
+    "B:<script[^>]*\\bsrc=\"/(?:[a-zA-Z0-9_-]{2,30}/){2,}[a-zA-Z0-9_-]{2,30}\\?v=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}&(?:amp;)?t=\\d"
   ],
   "challenge": [
     "H:set-cookie:sbsd=",
@@ -27,8 +32,12 @@
     "B:.*/\\.well-known/sbsd/",
     "B:.*/_sec/cp_challenge/",
     "B:.*\\bid=\"sec-cpt-if\"",
+    "B:.*\\bid=\"sec-if-cpt-container\"",
     "B:.*\\bsec-cp-challenge\\b",
+    "B:.*\\bsec-bc-tile-container\\b",
+    "B:.*\\bscf-akamai-logo\\b",
     "B:.*\\bbazadebezolkohpepadr\\b",
-    "B:.*Reference #\\d+\\.[0-9a-f]+\\.\\d+\\.[0-9a-f]+"
+    "B:.*Reference #\\d+\\.[0-9a-f]+\\.\\d+\\.[0-9a-f]+",
+    "B:<script[^>]*\\bsrc=\"/(?:[a-zA-Z0-9_-]{2,30}/){2,}[a-zA-Z0-9_-]{2,30}\\?v=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}&(?:amp;)?t=\\d"
   ]
 }
