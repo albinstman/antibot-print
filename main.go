@@ -40,8 +40,9 @@ redirects/decompress.
 Options:
   -c, --challenge   only report vendors actively serving a challenge/block,
                     not mere vendor presence
-  -p, --profile P   tls-client browser profile to impersonate when fetching a URL
-                    (default %s; e.g. chrome_133, firefox_135)
+  -p, --profile P   browser profile to impersonate when fetching a URL (default %s;
+                    e.g. chrome_146, firefox_135). chrome_147 and chrome_148 are
+                    synthesized from chrome_146's fingerprint with a bumped User-Agent
   -n, --naive       fetch with Go's default (non-browser) TLS/HTTP fingerprint
                     instead of impersonating a browser — surfaces vendors that
                     challenge suspicious clients but pass real browsers silently
@@ -52,6 +53,9 @@ Options:
   -D, --debug-full  like --debug, plus the two bulky sections — the normalized
                     view the regex runs against and the full raw response;
                     best redirected to a file (antibot -D URL > debug.txt)
+  -r, --raw         print only the raw fetched response (status line, headers,
+                    body — like 'curl -i -L'), no detection output; the exit code
+                    still reflects detection (0 vendor found, 1 none)
   -h, --help        show this help and exit
   -V, --version     show version and exit
 
@@ -80,6 +84,7 @@ func main() {
 	naive := false
 	debug := false
 	debugFull := false
+	rawOnly := false
 	profile := defaultProfile
 	profileSet := false
 	url := ""
@@ -99,6 +104,8 @@ func main() {
 			debug = true
 		case a == "-D" || a == "--debug-full":
 			debugFull = true
+		case a == "-r" || a == "--raw":
+			rawOnly = true
 		case a == "-p" || a == "--profile":
 			i++
 			if i >= len(args) {
@@ -131,19 +138,23 @@ func main() {
 	debug = debug || debugFull
 	var code int
 	if url != "" {
-		code = runFetch(url, profile, naive, regexText, debug, debugFull, challenge)
+		code = runFetch(url, profile, naive, regexText, debug, debugFull, challenge, rawOnly)
 	} else {
-		code = runDetect(regexText, debug, debugFull, challenge)
+		code = runDetect(regexText, debug, debugFull, challenge, rawOnly)
 	}
 	maybeNotifyUpdate() // throttled, TTY-only; prints after results, never blocks output
 	os.Exit(code)
 }
 
-func runDetect(regexText string, debug, full, challenge bool) int {
+func runDetect(regexText string, debug, full, challenge, rawOnly bool) int {
 	raw, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: reading stdin: %v\n", err)
 		return 2
+	}
+	if rawOnly {
+		os.Stdout.Write(raw)
+		return detect(raw, regexText, true) // exit code only; suppress slug output
 	}
 	if debug {
 		writeDebug(os.Stdout, raw, debugContext{fromStdin: true}, full, challenge)
@@ -153,11 +164,15 @@ func runDetect(regexText string, debug, full, challenge bool) int {
 
 // runFetch retrieves url directly (browser fingerprint, or Go's default when naive),
 // then detects on the captured response chain.
-func runFetch(url, profile string, naive bool, regexText string, debug, full, challenge bool) int {
+func runFetch(url, profile string, naive bool, regexText string, debug, full, challenge, rawOnly bool) int {
 	raw, err := fetch(url, profile, naive)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: %v\n", err)
 		return 2
+	}
+	if rawOnly {
+		os.Stdout.Write(raw)
+		return detect(raw, regexText, true) // exit code only; suppress slug output
 	}
 	if debug {
 		writeDebug(os.Stdout, raw, debugContext{url: url, profile: profile, naive: naive}, full, challenge)

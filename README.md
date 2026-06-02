@@ -52,7 +52,9 @@ $ antibot -n https://example.com
 perimeterx
 ```
 
-Use `-p` to impersonate a different browser (e.g. `chrome_133`, `firefox_135`):
+Use `-p` to impersonate a different browser (e.g. `chrome_146`, `firefox_135`). The
+default is `chrome_148`; `chrome_147` and `chrome_148` reuse `chrome_146`'s TLS/HTTP-2
+fingerprint (unchanged since 146) with only the User-Agent bumped:
 
 ```console
 $ antibot -p firefox_135 https://example.com
@@ -65,7 +67,7 @@ Add `-d` for diagnostics:
 $ antibot -d https://example.com
 request:
   url:    https://example.com
-  mode:   browser (profile chrome_146)
+  mode:   browser (profile chrome_148)
 response:
   status: 200
   bytes:  4521
@@ -80,6 +82,14 @@ Use `-D` to add the normalized view and full raw response:
 
 ```console
 $ antibot -D https://example.com > debug.txt
+```
+
+Use `-r` to print **only** the raw fetched response (status line, headers, body —
+like `curl -i -L`), with no detection output. The exit code still reflects detection
+(0 if a vendor was found, 1 if none), so it doubles as a fingerprinted `curl`:
+
+```console
+$ antibot -r https://example.com > response.txt
 ```
 
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
@@ -242,23 +252,20 @@ the reference (redirect chains, byte handling).
 ## Project structure
 
 ```
-signatures/<vendor>.json   source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
-main.go                    normalize, compile, detect; embeds the regexes
-fetch.go                   direct-fetch path: browser-fingerprinted HTTP via tls-client
-debug.go                   `--debug` diagnostic report (request, detection, raw response)
-update.go                  `antibot update` + throttled "update available" notifier
-main_test.go               smoke tests + artifact-sync guard
-fetch_test.go              fetch helpers: redirect/Location/header-order tests
-update_test.go             update helpers: asset name / checksum parsing tests
-antibot.re2.txt            compiled presence regex (embedded, usable standalone)
-antibot-challenge.re2.txt  compiled challenge-only regex (embedded, usable standalone)
-install.sh                 curl | bash installer (downloads a release binary)
-.github/workflows/release.yml   build 5 platforms on push to main -> rolling "latest" release
+signatures/<vendor>.json       source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
+main.go                        normalize, compile, detect; embeds the regexes
+fetch.go                       direct-fetch path: browser-fingerprinted HTTP via tls-client
+debug.go                       `--debug` diagnostic report (request, detection, raw response)
+update.go                      `antibot update` + throttled "update available" notifier
+main_test.go                   smoke tests + artifact-sync guard
+fetch_test.go                  fetch helpers: redirect/Location/header-order tests
+update_test.go                 update helpers: asset name / checksum parsing tests
+antibot.re2.txt                compiled presence regex (embedded, usable standalone)
+antibot-challenge.re2.txt      compiled challenge-only regex (embedded, usable standalone)
+install.sh                     curl | bash installer (downloads a release binary)
+.github/workflows/release.yml  build 5 platforms on push to main -> rolling "latest" release
+vendor/                        vendored Go deps
 ```
-
-The optional `challenge` array is the subset of `signals` that indicates an active
-challenge/block (it powers `--challenge`); compile fails if any challenge entry is
-not also in `signals`.
 
 ## Build from source
 

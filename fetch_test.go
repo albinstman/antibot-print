@@ -50,20 +50,22 @@ func TestResolveLocation(t *testing.T) {
 	}
 }
 
-// TestChromeHeaderOrderComplete guards that every real header we send is listed in
-// the HeaderOrderKey, so fhttp emits a complete, browser-ordered header block.
-func TestChromeHeaderOrderComplete(t *testing.T) {
-	h := chromeRequestHeader()
-	order := map[string]bool{}
-	for _, k := range h[http.HeaderOrderKey] {
-		order[k] = true
-	}
-	for k := range h {
-		if k == http.HeaderOrderKey {
-			continue
+// TestHeaderOrderComplete guards that every real header we send is listed in the
+// HeaderOrderKey, so fhttp emits a complete, browser-ordered header block, for each
+// browser-family header set.
+func TestHeaderOrderComplete(t *testing.T) {
+	for _, h := range []http.Header{chromeHeader(148), firefoxHeader(135)} {
+		order := map[string]bool{}
+		for _, k := range h[http.HeaderOrderKey] {
+			order[k] = true
 		}
-		if !order[k] {
-			t.Errorf("header %q is sent but missing from HeaderOrderKey", k)
+		for k := range h {
+			if k == http.HeaderOrderKey {
+				continue
+			}
+			if !order[k] {
+				t.Errorf("header %q is sent but missing from HeaderOrderKey", k)
+			}
 		}
 	}
 }

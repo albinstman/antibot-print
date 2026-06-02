@@ -20,6 +20,7 @@ import (
 	"io"
 	stdhttp "net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,10 +29,11 @@ import (
 	"github.com/bogdanfinn/tls-client/profiles"
 )
 
-// defaultProfile is the tls-client profile used when --profile is not given. Bump
-// this to the newest Chrome as bogdanfinn/tls-client adds profiles; the matching
-// header set below should be updated in lockstep.
-const defaultProfile = "chrome_146"
+// defaultProfile is the browser profile used when --profile is not given. Chrome's
+// TLS/HTTP-2 fingerprint has been stable since Chrome 146, so chrome_147 and
+// chrome_148 — which bogdanfinn/tls-client does not ship — are synthesized from
+// chrome_146's fingerprint with only the User-Agent bumped (see resolveProfile).
+const defaultProfile = "chrome_148"
 
 // maxRedirects caps the manually-followed redirect chain.
 const maxRedirects = 10
@@ -96,17 +98,18 @@ func fetchChain(rawURL string, do doer) ([]byte, error) {
 }
 
 // browserDoer builds a tls-client doer that impersonates the named browser profile,
-// sending Chrome's header set in Chrome's order across a shared cookie jar.
+// sending that browser's header set in its native order across a shared cookie jar.
 func browserDoer(profileName string) (doer, error) {
-	profile, ok := profiles.MappedTLSClients[profileName]
-	if !ok {
-		return nil, fmt.Errorf("unknown profile %q (see github.com/bogdanfinn/tls-client/profiles for names)", profileName)
+	tlsProfile, header, err := resolveProfile(profileName)
+	if err != nil {
+		return nil, err
 	}
 	client, err := tls_client.NewHttpClient(tls_client.NewNoopLogger(),
-		tls_client.WithClientProfile(profile),
+		tls_client.WithClientProfile(tlsProfile),
 		tls_client.WithTimeoutSeconds(int(fetchTimeout/time.Second)),
 		tls_client.WithCookieJar(tls_client.NewCookieJar()), // carry challenge cookies across hops
 		tls_client.WithNotFollowRedirects(),                 // we drive the chain ourselves
+		tls_client.WithRandomTLSExtensionOrder(),            // permute extension order per connection, like real Chrome
 	)
 	if err != nil {
 		return nil, err
@@ -116,7 +119,7 @@ func browserDoer(profileName string) (doer, error) {
 		if err != nil {
 			return nil, err
 		}
-		req.Header = chromeRequestHeader()
+		req.Header = header()
 		resp, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("fetching %s: %w", rawURL, err)
@@ -153,16 +156,68 @@ func naiveDoer() (doer, error) {
 	}, nil
 }
 
-// chromeRequestHeader returns Chrome's navigation request headers in the order Chrome
-// sends them. The HeaderOrderKey magic key tells fhttp to emit them in this order; the
-// HTTP/2 pseudo-header order and SETTINGS frame come from the client profile itself.
-func chromeRequestHeader() http.Header {
+// resolveProfile maps a --profile name to the tls-client ClientProfile that drives
+// its TLS/HTTP-2 fingerprint and a builder for the header set to send with it.
+//
+// Chrome's ClientHello and HTTP/2 settings have not changed since Chrome 146, so
+// chrome_147 and chrome_148 — which bogdanfinn/tls-client does not ship — reuse
+// chrome_146's fingerprint and differ only in their User-Agent. Every other name is
+// looked up in the library's profile table; its header set is chosen by browser family.
+func resolveProfile(name string) (profiles.ClientProfile, func() http.Header, error) {
+	switch name {
+	case "chrome_147", "chrome_148":
+		v := majorVersion(name)
+		return profiles.Chrome_146, func() http.Header { return chromeHeader(v) }, nil
+	}
+	p, ok := profiles.MappedTLSClients[name]
+	if !ok {
+		return profiles.ClientProfile{}, nil, fmt.Errorf(
+			"unknown profile %q (chrome_147/chrome_148, or any name from github.com/bogdanfinn/tls-client/profiles)", name)
+	}
+	return p, headerFor(name), nil
+}
+
+// headerFor returns the header builder matching a profile's browser family. Firefox
+// gets its own set (no Chromium client hints); everything else (chrome, edge, opera,
+// …) gets the Chromium navigation header set. The version is taken from the name.
+func headerFor(name string) func() http.Header {
+	v := majorVersion(name)
+	if strings.HasPrefix(name, "firefox") {
+		return func() http.Header { return firefoxHeader(v) }
+	}
+	if v == 0 {
+		v = majorVersion(defaultProfile)
+	}
+	return func() http.Header { return chromeHeader(v) }
+}
+
+// majorVersion extracts the first run of digits from a profile name
+// ("chrome_148" → 148, "firefox_135" → 135); 0 if the name carries no version.
+func majorVersion(name string) int {
+	i := strings.IndexFunc(name, func(r rune) bool { return r >= '0' && r <= '9' })
+	if i < 0 {
+		return 0
+	}
+	j := i
+	for j < len(name) && name[j] >= '0' && name[j] <= '9' {
+		j++
+	}
+	v, _ := strconv.Atoi(name[i:j])
+	return v
+}
+
+// chromeHeader returns Chrome's navigation request headers in the order Chrome sends
+// them, with the given major version stamped into the User-Agent and client hints.
+// The header set is stable across recent Chrome majors; only the version moves. The
+// HeaderOrderKey magic key tells fhttp to emit them in this order; the HTTP/2
+// pseudo-header order and SETTINGS frame come from the client profile itself.
+func chromeHeader(major int) http.Header {
 	return http.Header{
-		"sec-ch-ua":                 {`"Chromium";v="146", "Google Chrome";v="146", "Not?A_Brand";v="99"`},
+		"sec-ch-ua":                 {fmt.Sprintf(`"Chromium";v="%d", "Google Chrome";v="%d", "Not/A)Brand";v="99"`, major, major)},
 		"sec-ch-ua-mobile":          {"?0"},
 		"sec-ch-ua-platform":        {`"Windows"`},
 		"upgrade-insecure-requests": {"1"},
-		"user-agent":                {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"},
+		"user-agent":                {fmt.Sprintf("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%d.0.0.0 Safari/537.36", major)},
 		"accept":                    {"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"},
 		"sec-fetch-site":            {"none"},
 		"sec-fetch-mode":            {"navigate"},
@@ -176,6 +231,30 @@ func chromeRequestHeader() http.Header {
 			"upgrade-insecure-requests", "user-agent", "accept",
 			"sec-fetch-site", "sec-fetch-mode", "sec-fetch-user", "sec-fetch-dest",
 			"accept-encoding", "accept-language", "priority",
+		},
+	}
+}
+
+// firefoxHeader returns Firefox's navigation request headers in Firefox's order, with
+// the given major version stamped into the User-Agent. Firefox sends no Chromium
+// client hints (sec-ch-ua*); this is a best-effort set — refine against a real
+// capture if exact Firefox parity is needed.
+func firefoxHeader(major int) http.Header {
+	return http.Header{
+		"user-agent":                {fmt.Sprintf("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:%d.0) Gecko/20100101 Firefox/%d.0", major, major)},
+		"accept":                    {"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"},
+		"accept-language":           {"en-US,en;q=0.5"},
+		"accept-encoding":           {"gzip, deflate, br, zstd"},
+		"upgrade-insecure-requests": {"1"},
+		"sec-fetch-dest":            {"document"},
+		"sec-fetch-mode":            {"navigate"},
+		"sec-fetch-site":            {"none"},
+		"sec-fetch-user":            {"?1"},
+		"priority":                  {"u=0, i"},
+		http.HeaderOrderKey: {
+			"user-agent", "accept", "accept-language", "accept-encoding",
+			"upgrade-insecure-requests", "sec-fetch-dest", "sec-fetch-mode",
+			"sec-fetch-site", "sec-fetch-user", "priority",
 		},
 	}
 }
