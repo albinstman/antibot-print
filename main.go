@@ -48,8 +48,8 @@ Options:
                     challenge suspicious clients but pass real browsers silently
   -d, --debug       print a light diagnostic instead of the slug list: how the
                     response was fetched, the status chain, and every vendor
-                    matched in the active tier with the exact text that triggered
-                    it (respects -c)
+                    matched — in both tiers (presence and challenge), regardless
+                    of -c — with the exact text that triggered it
   -D, --debug-full  like --debug, plus the two bulky sections — the normalized
                     view the regex runs against and the full raw response;
                     best redirected to a file (antibot -D URL > debug.txt)
@@ -138,15 +138,15 @@ func main() {
 	debug = debug || debugFull
 	var code int
 	if url != "" {
-		code = runFetch(url, profile, naive, regexText, debug, debugFull, challenge, rawOnly)
+		code = runFetch(url, profile, naive, regexText, debug, debugFull, rawOnly)
 	} else {
-		code = runDetect(regexText, debug, debugFull, challenge, rawOnly)
+		code = runDetect(regexText, debug, debugFull, rawOnly)
 	}
 	maybeNotifyUpdate() // throttled, TTY-only; prints after results, never blocks output
 	os.Exit(code)
 }
 
-func runDetect(regexText string, debug, full, challenge, rawOnly bool) int {
+func runDetect(regexText string, debug, full, rawOnly bool) int {
 	raw, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: reading stdin: %v\n", err)
@@ -157,14 +157,14 @@ func runDetect(regexText string, debug, full, challenge, rawOnly bool) int {
 		return detect(raw, regexText, true) // exit code only; suppress slug output
 	}
 	if debug {
-		writeDebug(os.Stdout, raw, debugContext{fromStdin: true}, full, challenge)
+		writeDebug(os.Stdout, raw, debugContext{fromStdin: true}, full)
 	}
 	return detect(raw, regexText, debug)
 }
 
 // runFetch retrieves url directly (browser fingerprint, or Go's default when naive),
 // then detects on the captured response chain.
-func runFetch(url, profile string, naive bool, regexText string, debug, full, challenge, rawOnly bool) int {
+func runFetch(url, profile string, naive bool, regexText string, debug, full, rawOnly bool) int {
 	raw, err := fetch(url, profile, naive)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: %v\n", err)
@@ -175,7 +175,7 @@ func runFetch(url, profile string, naive bool, regexText string, debug, full, ch
 		return detect(raw, regexText, true) // exit code only; suppress slug output
 	}
 	if debug {
-		writeDebug(os.Stdout, raw, debugContext{url: url, profile: profile, naive: naive}, full, challenge)
+		writeDebug(os.Stdout, raw, debugContext{url: url, profile: profile, naive: naive}, full)
 	}
 	return detect(raw, regexText, debug)
 }

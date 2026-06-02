@@ -36,7 +36,7 @@ func TestDetectVerbose(t *testing.T) {
 func TestWriteDebugFull(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
 	var buf bytes.Buffer
-	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, true, false)
+	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, true)
 	out := buf.String()
 
 	for _, want := range []string{
@@ -61,7 +61,7 @@ func TestWriteDebugFull(t *testing.T) {
 func TestWriteDebugLight(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
 	var buf bytes.Buffer
-	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, false, false)
+	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, false)
 	out := buf.String()
 
 	for _, want := range []string{"detection (presence):", "cloudflare"} {
@@ -76,19 +76,18 @@ func TestWriteDebugLight(t *testing.T) {
 	}
 }
 
-// TestWriteDebugTier checks the report shows only the tier the run uses: the
-// challenge tier under -c, the presence tier otherwise.
+// TestWriteDebugTier checks the report always shows both tiers — presence and
+// challenge — regardless of -c.
 func TestWriteDebugTier(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
-	var presence, challenge bytes.Buffer
-	writeDebug(&presence, []byte(raw), debugContext{fromStdin: true}, false, false)
-	writeDebug(&challenge, []byte(raw), debugContext{fromStdin: true}, false, true)
+	var buf bytes.Buffer
+	writeDebug(&buf, []byte(raw), debugContext{fromStdin: true}, false)
 
-	if p := presence.String(); !strings.Contains(p, "detection (presence):") || strings.Contains(p, "detection (challenge):") {
-		t.Errorf("default run should report only the presence tier, got:\n%s", p)
-	}
-	if c := challenge.String(); !strings.Contains(c, "detection (challenge):") || strings.Contains(c, "detection (presence):") {
-		t.Errorf("-c run should report only the challenge tier, got:\n%s", c)
+	out := buf.String()
+	for _, want := range []string{"detection (presence):", "detection (challenge):"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("debug output missing %q, got:\n%s", want, out)
+		}
 	}
 }
 
@@ -114,7 +113,7 @@ func TestWriteDebugRedirectChain(t *testing.T) {
 	raw := "HTTP/1.1 301 Moved Permanently\r\nLocation: https://www.example.com/\r\n\r\n" +
 		"HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\n<html>ok</html>"
 	var buf bytes.Buffer
-	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, false, false)
+	writeDebug(&buf, []byte(raw), debugContext{url: "https://example.com", profile: "chrome_146"}, false)
 	out := buf.String()
 	if want := "redirects:\n    https://example.com (301) -> https://www.example.com/ (200)"; !strings.Contains(out, want) {
 		t.Errorf("redirect chain missing %q\n--- got ---\n%s", want, out)
@@ -122,7 +121,7 @@ func TestWriteDebugRedirectChain(t *testing.T) {
 
 	// A single-hop response has nothing to chain, so the block is omitted.
 	var single bytes.Buffer
-	writeDebug(&single, []byte("HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\nhi"), debugContext{url: "https://example.com", profile: "chrome_146"}, false, false)
+	writeDebug(&single, []byte("HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\nhi"), debugContext{url: "https://example.com", profile: "chrome_146"}, false)
 	if strings.Contains(single.String(), "redirects:") {
 		t.Errorf("single-hop response should omit the redirects block, got:\n%s", single.String())
 	}
@@ -131,7 +130,7 @@ func TestWriteDebugRedirectChain(t *testing.T) {
 // TestWriteDebugStdin checks the stdin source is labeled and no fetch mode leaks in.
 func TestWriteDebugStdin(t *testing.T) {
 	var buf bytes.Buffer
-	writeDebug(&buf, []byte("HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\nhi"), debugContext{fromStdin: true}, true, false)
+	writeDebug(&buf, []byte("HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\nhi"), debugContext{fromStdin: true}, true)
 	out := buf.String()
 	if !strings.Contains(out, "source: stdin") {
 		t.Errorf("expected stdin source label, got:\n%s", out)

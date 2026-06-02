@@ -76,6 +76,8 @@ response:
 detection (presence):
   cloudflare
     ← H:set-cookie:__cf_bm=
+detection (challenge):
+  (none)
 ```
 
 Use `-D` to add the normalized view and full raw response:

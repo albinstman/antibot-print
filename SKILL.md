@@ -49,9 +49,9 @@ cloudflare
 ```
 
 Add `-d` to diagnose why a result looks wrong: a light report replaces the slug list with
-the fetch mode, status chain, and each vendor matched in the active tier (respects `-c`) plus
-the exact text that triggered it. Use `-D` to also include the normalized view and full raw
-response — large, so redirect it to a file:
+the fetch mode, status chain, and each vendor matched in both tiers — presence and challenge,
+regardless of `-c` — plus the exact text that triggered it. Use `-D` to also include the
+normalized view and full raw response — large, so redirect it to a file:
 
 ```console
 $ antibot -d https://example.com
