@@ -3,7 +3,7 @@
 // active tier with the exact text that triggered it, and (with -D) the normalized
 // view the regex runs against plus the full raw response. It prints to stdout in
 // place of the slug list.
-package main
+package antibot
 
 import (
 	"fmt"

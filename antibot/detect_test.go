@@ -1,30 +1,24 @@
-package main
+package antibot
 
 import (
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 )
 
-// regexForTest compiles fresh from the signature sources so tests check the
-// current signatures, not a possibly-stale embedded artifact.
+// regexForTest compiles the embedded presence artifact. The artifact is generated
+// from the current signatures by cmd/gen (and gitignored), so tests run against the
+// freshly built regex — not a stale committed copy.
 func regexForTest(t *testing.T) *regexp.Regexp {
 	t.Helper()
-	pattern, err := CompileSignatures("signatures", "")
-	if err != nil {
-		t.Fatalf("compile signatures: %v", err)
-	}
-	return regexp.MustCompile(pattern)
+	return regexp.MustCompile(strings.TrimSpace(embeddedRegex))
 }
 
-// challengeRegexForTest compiles the challenge-only tier fresh from sources.
+// challengeRegexForTest compiles the embedded challenge-only artifact.
 func challengeRegexForTest(t *testing.T) *regexp.Regexp {
 	t.Helper()
-	pattern, err := CompileChallengeSignatures("signatures", "")
-	if err != nil {
-		t.Fatalf("compile challenge signatures: %v", err)
-	}
-	return regexp.MustCompile(pattern)
+	return regexp.MustCompile(strings.TrimSpace(embeddedChallengeRegex))
 }
 
 func TestDetect(t *testing.T) {
@@ -123,27 +117,5 @@ func TestChallengeDetect(t *testing.T) {
 				t.Errorf("Detect() = %v, want %v", got, tc.want)
 			}
 		})
-	}
-}
-
-// TestArtifactInSync guards against committing signatures without regenerating
-// the embedded regex artifacts.
-func TestArtifactInSync(t *testing.T) {
-	pattern, err := CompileSignatures("signatures", "")
-	if err != nil {
-		t.Fatalf("compile: %v", err)
-	}
-	embedded := regexp.MustCompile(`\s+$`).ReplaceAllString(embeddedRegex, "")
-	if embedded != pattern {
-		t.Error("antibot.re2.txt is stale — run: go run . compile")
-	}
-
-	chPattern, err := CompileChallengeSignatures("signatures", "")
-	if err != nil {
-		t.Fatalf("compile challenge: %v", err)
-	}
-	embeddedCh := regexp.MustCompile(`\s+$`).ReplaceAllString(embeddedChallengeRegex, "")
-	if embeddedCh != chPattern {
-		t.Error("antibot-challenge.re2.txt is stale — run: go run . compile")
 	}
 }

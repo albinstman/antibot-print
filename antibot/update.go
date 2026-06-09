@@ -3,7 +3,7 @@
 // at most once a day and only when stderr is a terminal, so piped/scripted/CI use
 // stays silent and offline. `antibot update` is the only thing that replaces the
 // binary, and it verifies the download against the release's SHA256SUMS first.
-package main
+package antibot
 
 import (
 	"context"

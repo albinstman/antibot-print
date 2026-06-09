@@ -1,7 +1,8 @@
 # antibot
 
 Print the antibot vendors protecting a site by matching its HTTP response against a
-single [regex](antibot.re2.txt).
+single regex, compiled from the per-vendor [signatures](signatures/) and published
+as a [release asset](https://github.com/albinstman/antibot-print/releases/latest/download/antibot.re2.txt).
 
 ## Install
 
@@ -117,6 +118,12 @@ that teaches a coding agent (e.g. Claude Code) to use `antibot`. To install it, 
 [`install-skill.md`](install-skill.md) to your agent.
 
 ## Language integration
+
+The examples below read `antibot.re2.txt` from the working directory. The compiled
+regex is **not** committed to the repo — download it from the
+[latest release](https://github.com/albinstman/antibot-print/releases/latest/download/antibot.re2.txt)
+(and `antibot-challenge.re2.txt` for the challenge tier), or generate both locally
+with `go run ./cmd/gen`.
 
 ### Go
 
@@ -251,24 +258,33 @@ for (const m of norm.matchAll(rx))
 console.log([...vendors].sort());
 ```
 
-These normalizers cover the common single-response case; `Normalize` in `main.go` is
-the reference (redirect chains, byte handling).
+These normalizers cover the common single-response case; `Normalize` in
+`antibot/detect.go` is the reference (redirect chains, byte handling).
 
 ## Project structure
 
 ```
 signatures/<vendor>.json       source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
-main.go                        normalize, compile, detect; embeds the regexes
-fetch.go                       direct-fetch path: browser-fingerprinted HTTP via tls-client
-debug.go                       `--debug` diagnostic report (request, detection, raw response)
-open.go                        `--open`: extract final response body, open in default browser
-update.go                      `antibot update` + throttled "update available" notifier
-main_test.go                   smoke tests + artifact-sync guard
-debug_test.go                  debug report: tiers, hop parsing, redirect-chain rendering tests
-fetch_test.go                  fetch helpers: redirect/Location/header-order tests
-update_test.go                 update helpers: asset name / checksum parsing tests
-antibot.re2.txt                compiled presence regex (embedded, usable standalone)
-antibot-challenge.re2.txt      compiled challenge-only regex (embedded, usable standalone)
+
+cmd/cli/main.go                CLI entrypoint (package main): forwards to package antibot
+cmd/gen/main.go                generator entrypoint (package main): forwards to package gen
+
+antibot/                       package antibot — the CLI library
+  run.go                       flags + dispatch
+  detect.go                    normalize + detect (the runtime matcher)
+  regex.go                     //go:embed of the generated .re2.txt artifacts
+  fetch.go                     direct-fetch path: browser-fingerprinted HTTP via tls-client
+  debug.go                     `--debug` diagnostic report (request, detection, raw response)
+  open.go                      `--open`: extract final response body, open in default browser
+  update.go                    `antibot update` + throttled "update available" notifier
+  *_test.go                    detect / fetch / debug / update tests
+  antibot.re2.txt              GENERATED, gitignored — compiled presence regex (embedded)
+  antibot-challenge.re2.txt    GENERATED, gitignored — compiled challenge-only regex (embedded)
+
+gen/                           package gen — compiles signatures/ into the .re2.txt (no embed)
+  compile.go                   load/validate signatures, assemble the RE2 artifacts
+  compile_test.go              compile / validation tests
+
 install.sh                     curl | bash installer (downloads a release binary)
 .github/workflows/release.yml  build 5 platforms on push to main -> rolling "latest" release
 vendor/                        vendored Go deps
@@ -276,16 +292,23 @@ vendor/                        vendored Go deps
 
 ## Build from source
 
+The compiled regex artifacts are **not** committed — generate them first, then build:
+
 ```sh
-go build -o antibot .   # embeds antibot.re2.txt + antibot-challenge.re2.txt
-go test ./...           # smoke tests + artifact-sync check
-go run . compile        # regenerate both .re2.txt artifacts from signatures/
+go run ./cmd/gen              # generate antibot/*.re2.txt from signatures/ (required first)
+go build -o bin/antibot ./cmd/cli   # embeds the generated artifacts
+go test ./...                # detection + compile tests
 ```
 
+`go run ./cmd/gen` has no embedded files in its import graph, so it works on a clean
+checkout — that's how it bootstraps the artifacts the CLI then embeds. You must run it
+once after cloning and again after editing any signature.
+
 To add or change a vendor, edit a `signatures/<vendor>.json` (each signal prefixed
-`S:`/`H:`/`B:`, valid RE2, vendor-specific) and run `go run . compile`. Pushing to
-`main` recompiles the regexes and rebuilds every platform binary into the rolling
-**latest** release, so the signature files are the only thing you maintain.
+`S:`/`H:`/`B:`, valid RE2, vendor-specific) and run `go run ./cmd/gen`. Pushing to
+`main` recompiles the regexes, rebuilds every platform binary, and publishes both the
+binaries and the compiled `.re2.txt` into the rolling **latest** release — so the
+signature files are the only thing you maintain (and the only regex source in git).
 
 ## License
 

@@ -1,6 +1,6 @@
 // --open support: extract the final response body from a raw HTTP chain and open
 // it in the user's default browser, so the page antibot fetched can be eyeballed.
-package main
+package antibot
 
 import (
 	"bytes"

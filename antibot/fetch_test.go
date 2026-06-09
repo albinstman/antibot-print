@@ -1,9 +1,10 @@
-package main
+package antibot
 
 import (
 	"bytes"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 
 	http "github.com/bogdanfinn/fhttp"
@@ -74,11 +75,7 @@ func TestHeaderOrderComplete(t *testing.T) {
 // shape Normalize/Detect expects — including a redirect-hop Set-Cookie that must
 // survive into the captured chain.
 func TestWriteRawResponseRoundTrip(t *testing.T) {
-	pattern, err := CompileSignatures("signatures", "")
-	if err != nil {
-		t.Fatalf("compile signatures: %v", err)
-	}
-	re := regexp.MustCompile(pattern)
+	re := regexp.MustCompile(strings.TrimSpace(embeddedRegex))
 
 	var buf bytes.Buffer
 	// hop 1: a 302 that plants the Akamai _abck cookie, then redirects.

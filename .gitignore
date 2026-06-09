@@ -7,6 +7,12 @@
 *.log
 
 # Go build outputs
+/bin/
 /antibot-print
 /antibot-print.exe
 /dist/
+
+# Generated regex artifacts — produced from signatures/ by `go run ./cmd/gen`,
+# embedded by package antibot, published as release assets. Never committed.
+/antibot/antibot.re2.txt
+/antibot/antibot-challenge.re2.txt

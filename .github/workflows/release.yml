@@ -22,7 +22,7 @@ jobs:
           cache: false   # no dependencies (no go.sum) -> nothing to cache
 
       - name: Compile the latest regex from signatures
-        run: go run . compile   # regenerates antibot.re2.txt; the build embeds this
+        run: go run ./cmd/gen   # generates antibot/*.re2.txt (gitignored); the build embeds these
 
       - name: Vet and test
         run: |
@@ -40,8 +40,11 @@ jobs:
             [ "$os" = "windows" ] && out="${out}.exe"
             echo "building $out"
             GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
-              go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "$out" .
+              go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "$out" ./cmd/cli
           done
+          # Ship the compiled regex alongside the binaries so standalone/library users
+          # can grab the current artifacts (they are not committed to the repo).
+          cp antibot/antibot.re2.txt antibot/antibot-challenge.re2.txt dist/
           printf '%s' "$VERSION" > dist/VERSION   # tiny asset the update-checker polls
           ( cd dist && sha256sum * > SHA256SUMS )
           ls -l dist

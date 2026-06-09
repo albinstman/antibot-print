@@ -12,7 +12,7 @@
 // Either way we follow redirects manually, capturing each hop's raw response and
 // concatenating them (like `curl -i -L`) so intermediate Set-Cookie/headers — where
 // challenges are frequently planted — survive into Normalize's multi-block parsing.
-package main
+package antibot
 
 import (
 	"bytes"
