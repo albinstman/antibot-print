@@ -1,8 +1,7 @@
 # antibot
 
 Print the antibot vendors protecting a site by matching its HTTP response against a
-single regex, compiled from the per-vendor [signatures](signatures/) and published
-as a [release asset](https://github.com/albinstman/antibot-print/releases/latest/download/antibot.re2.txt).
+single [regex](https://github.com/albinstman/antibot-print/releases/tag/latest).
 
 ## Install
 
