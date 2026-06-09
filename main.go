@@ -56,6 +56,8 @@ Options:
   -r, --raw         print only the raw fetched response (status line, headers,
                     body — like 'curl -i -L'), no detection output; the exit code
                     still reflects detection (0 vendor found, 1 none)
+  -o, --open        open the fetched HTML (final response body) in your default
+                    browser, in addition to the normal output
   -h, --help        show this help and exit
   -V, --version     show version and exit
 
@@ -85,6 +87,7 @@ func main() {
 	debug := false
 	debugFull := false
 	rawOnly := false
+	open := false
 	profile := defaultProfile
 	profileSet := false
 	url := ""
@@ -106,6 +109,8 @@ func main() {
 			debugFull = true
 		case a == "-r" || a == "--raw":
 			rawOnly = true
+		case a == "-o" || a == "--open":
+			open = true
 		case a == "-p" || a == "--profile":
 			i++
 			if i >= len(args) {
@@ -138,46 +143,55 @@ func main() {
 	debug = debug || debugFull
 	var code int
 	if url != "" {
-		code = runFetch(url, profile, naive, regexText, debug, debugFull, rawOnly)
+		code = runFetch(url, profile, naive, regexText, debug, debugFull, rawOnly, open)
 	} else {
-		code = runDetect(regexText, debug, debugFull, rawOnly)
+		code = runDetect(regexText, debug, debugFull, rawOnly, open)
 	}
 	maybeNotifyUpdate() // throttled, TTY-only; prints after results, never blocks output
 	os.Exit(code)
 }
 
-func runDetect(regexText string, debug, full, rawOnly bool) int {
+func runDetect(regexText string, debug, full, rawOnly, open bool) int {
 	raw, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: reading stdin: %v\n", err)
 		return 2
 	}
-	if rawOnly {
-		os.Stdout.Write(raw)
-		return detect(raw, regexText, true) // exit code only; suppress slug output
-	}
-	if debug {
-		writeDebug(os.Stdout, raw, debugContext{fromStdin: true}, full)
-	}
-	return detect(raw, regexText, debug)
+	return emit(raw, debugContext{fromStdin: true}, regexText, debug, full, rawOnly, open)
 }
 
 // runFetch retrieves url directly (browser fingerprint, or Go's default when naive),
 // then detects on the captured response chain.
-func runFetch(url, profile string, naive bool, regexText string, debug, full, rawOnly bool) int {
+func runFetch(url, profile string, naive bool, regexText string, debug, full, rawOnly, open bool) int {
 	raw, err := fetch(url, profile, naive)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "antibot: %v\n", err)
 		return 2
 	}
-	if rawOnly {
+	return emit(raw, debugContext{url: url, profile: profile, naive: naive}, regexText, debug, full, rawOnly, open)
+}
+
+// emit writes the chosen output for raw (raw passthrough, debug report, or the
+// default slug list), then — when open is set — opens the final response body in
+// the user's default browser. It returns the detection exit code.
+func emit(raw []byte, ctx debugContext, regexText string, debug, full, rawOnly, open bool) int {
+	var code int
+	switch {
+	case rawOnly:
 		os.Stdout.Write(raw)
-		return detect(raw, regexText, true) // exit code only; suppress slug output
+		code = detect(raw, regexText, true) // exit code only; suppress slug output
+	default:
+		if debug {
+			writeDebug(os.Stdout, raw, ctx, full)
+		}
+		code = detect(raw, regexText, debug)
 	}
-	if debug {
-		writeDebug(os.Stdout, raw, debugContext{url: url, profile: profile, naive: naive}, full)
+	if open {
+		if err := openInBrowser(extractFinalBody(raw)); err != nil {
+			fmt.Fprintf(os.Stderr, "antibot: opening browser: %v\n", err)
+		}
 	}
-	return detect(raw, regexText, debug)
+	return code
 }
 
 // detect compiles regexText, runs it over raw, prints the sorted vendor slugs

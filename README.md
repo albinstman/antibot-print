@@ -52,9 +52,7 @@ $ antibot -n https://example.com
 perimeterx
 ```
 
-Use `-p` to impersonate a different browser (e.g. `chrome_146`, `firefox_135`). The
-default is `chrome_148`; `chrome_147` and `chrome_148` reuse `chrome_146`'s TLS/HTTP-2
-fingerprint (unchanged since 146) with only the User-Agent bumped:
+Use `-p` to impersonate a different browser (e.g. `chrome_146`, `firefox_135`):
 
 ```console
 $ antibot -p firefox_135 https://example.com
@@ -86,12 +84,17 @@ Use `-D` to add the normalized view and full raw response:
 $ antibot -D https://example.com > debug.txt
 ```
 
-Use `-r` to print **only** the raw fetched response (status line, headers, body —
-like `curl -i -L`), with no detection output. The exit code still reflects detection
-(0 if a vendor was found, 1 if none), so it doubles as a fingerprinted `curl`:
+Use `-r` to only print the raw fetched response:
 
 ```console
 $ antibot -r https://example.com > response.txt
+```
+
+Use `-o` to open the fetched HTML:
+
+```console
+$ antibot -o https://example.com
+cloudflare
 ```
 
 To run the regex yourself instead of the binary, see [Language integration](#language-integration).
@@ -258,8 +261,10 @@ signatures/<vendor>.json       source of truth: {vendor, signals:[RE2], challeng
 main.go                        normalize, compile, detect; embeds the regexes
 fetch.go                       direct-fetch path: browser-fingerprinted HTTP via tls-client
 debug.go                       `--debug` diagnostic report (request, detection, raw response)
+open.go                        `--open`: extract final response body, open in default browser
 update.go                      `antibot update` + throttled "update available" notifier
 main_test.go                   smoke tests + artifact-sync guard
+debug_test.go                  debug report: tiers, hop parsing, redirect-chain rendering tests
 fetch_test.go                  fetch helpers: redirect/Location/header-order tests
 update_test.go                 update helpers: asset name / checksum parsing tests
 antibot.re2.txt                compiled presence regex (embedded, usable standalone)
