@@ -13,7 +13,6 @@
     "H:cf-mitigated:",
     "B:.*\\b_cf_chl_opt\\b",
     "B:.*__cf_chl_(?:rt|f|jschl)_tk",
-    "B:.*<title>Just a moment\\.\\.\\.</title>",
-    "B:.*Sorry, you have been blocked"
+    "B:.*<title>Just a moment\\.\\.\\.</title>"
   ]
 }
