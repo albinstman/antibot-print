@@ -78,7 +78,7 @@ detection (challenge):
   (none)
 ```
 
-Use `-D` to add the normalized view and full raw response:
+Use `-D` to add the full raw response:
 
 ```console
 $ antibot -D https://example.com > debug.txt

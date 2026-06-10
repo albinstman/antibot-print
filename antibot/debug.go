@@ -1,8 +1,7 @@
 // --debug path: instead of just naming vendors, dump a diagnostic of one
 // response — how it was fetched, the redirect chain, every vendor matched in the
-// active tier with the exact text that triggered it, and (with -D) the normalized
-// view the regex runs against plus the full raw response. It prints to stdout in
-// place of the slug list.
+// active tier with the exact text that triggered it, and (with -D) the full raw
+// response. It prints to stdout in place of the slug list.
 package antibot
 
 import (
@@ -22,10 +21,7 @@ type debugContext struct {
 	naive     bool
 }
 
-const (
-	debugMatchCap = 200  // truncate a single matched span for display
-	debugBodyCap  = 2000 // truncate the flattened B: line in the normalized view
-)
+const debugMatchCap = 200 // truncate a single matched span for display
 
 // vendorMatch is one vendor and the exact normalized substrings its named group
 // captured — the "what did it actually see" view powering --debug.
@@ -74,8 +70,8 @@ func detectVerbose(norm string, re *regexp.Regexp) []vendorMatch {
 //
 // The light report (full == false) is the small, console-friendly half: how the
 // response was fetched, the status and redirect chain, and every vendor matched
-// with the exact text that triggered it. The full report adds the two bulky
-// sections — the normalized view and the entire raw response.
+// with the exact text that triggered it. The full report adds the entire raw
+// response.
 func writeDebug(w io.Writer, raw []byte, ctx debugContext, full bool) {
 	norm := Normalize(raw, DefaultBodyCap)
 
@@ -107,18 +103,9 @@ func writeDebug(w io.Writer, raw []byte, ctx debugContext, full bool) {
 	writeDebugTier(w, "challenge", norm, embeddedChallengeRegex)
 
 	if !full {
-		// Light report: stop before the bulky sections, but point at how to get them.
-		fmt.Fprintln(w, "(run -D/--debug-full for the normalized view + full raw response)")
+		// Light report: stop before the raw response, but point at how to get it.
+		fmt.Fprintln(w, "(run -D/--debug-full for the full raw response)")
 		return
-	}
-
-	fmt.Fprintln(w, "normalized (what the regex matches against):")
-	for _, line := range strings.Split(norm, "\n") {
-		if strings.HasPrefix(line, "B:") && len(line) > debugBodyCap {
-			fmt.Fprintf(w, "  %s… (%d body bytes, truncated)\n", line[:debugBodyCap], len(line)-len("B:"))
-			continue
-		}
-		fmt.Fprintf(w, "  %s\n", line)
 	}
 
 	// The full raw response, verbatim, exactly as captured — this is the source of

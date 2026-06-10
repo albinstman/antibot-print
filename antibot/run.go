@@ -41,8 +41,7 @@ Options:
                     response was fetched, the status chain, and every vendor
                     matched — in both tiers (presence and challenge), regardless
                     of -c — with the exact text that triggered it
-  -D, --debug-full  like --debug, plus the two bulky sections — the normalized
-                    view the regex runs against and the full raw response;
+  -D, --debug-full  like --debug, plus the full raw response;
                     best redirected to a file (antibot -D URL > debug.txt)
   -r, --raw         print only the raw fetched response (status line, headers,
                     body — like 'curl -i -L'), no detection output; the exit code

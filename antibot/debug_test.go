@@ -32,7 +32,7 @@ func TestDetectVerbose(t *testing.T) {
 }
 
 // TestWriteDebugFull checks the full diagnostic covers the request, the active
-// detection tier, the normalized view, and the full raw response.
+// detection tier, and the full raw response.
 func TestWriteDebugFull(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
 	var buf bytes.Buffer
@@ -45,8 +45,6 @@ func TestWriteDebugFull(t *testing.T) {
 		"mode:   browser (profile chrome_146)",
 		"detection (presence):",
 		"cloudflare",
-		"normalized (what the regex matches against):",
-		"S:403",
 		"raw response:",
 		"<html>blocked</html>", // full raw response is included verbatim
 	} {
@@ -57,7 +55,7 @@ func TestWriteDebugFull(t *testing.T) {
 }
 
 // TestWriteDebugLight checks the light report keeps the small sections but omits
-// the two bulky ones (normalized view + raw response).
+// the raw response.
 func TestWriteDebugLight(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
 	var buf bytes.Buffer
@@ -69,7 +67,7 @@ func TestWriteDebugLight(t *testing.T) {
 			t.Errorf("light debug output missing %q\n--- got ---\n%s", want, out)
 		}
 	}
-	for _, absent := range []string{"normalized (what the regex matches against):", "raw response:", "<html>blocked</html>"} {
+	for _, absent := range []string{"raw response:", "<html>blocked</html>"} {
 		if strings.Contains(out, absent) {
 			t.Errorf("light debug output should omit %q\n--- got ---\n%s", absent, out)
 		}
