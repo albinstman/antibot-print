@@ -29,8 +29,10 @@ reveal themselves. When piping, use 'curl -isS -L --compressed' to follow
 redirects/decompress.
 
 Options:
-  -c, --challenge   only report vendors actively serving a challenge/block,
+  -c, --challenge   only report vendors actively serving a challenge,
                     not mere vendor presence
+  -b, --block       only report vendors serving a hard block (denied outright,
+                    nothing to solve), not mere vendor presence
   -p, --profile P   browser profile to impersonate when fetching a URL (default %s;
                     e.g. chrome_146, firefox_135). chrome_147 and chrome_148 are
                     synthesized from chrome_146's fingerprint with a bumped User-Agent
@@ -39,8 +41,8 @@ Options:
                     challenge suspicious clients but pass real browsers silently
   -d, --debug       print a light diagnostic instead of the slug list: how the
                     response was fetched, the status chain, and every vendor
-                    matched — in both tiers (presence and challenge), regardless
-                    of -c — with the exact text that triggered it
+                    matched — in all tiers (presence, challenge and block),
+                    regardless of -c/-b — with the exact text that triggered it
   -D, --debug-full  like --debug, plus the full raw response;
                     best redirected to a file (antibot -D URL > debug.txt)
   -r, --raw         print only the raw fetched response (status line, headers,
@@ -70,6 +72,7 @@ func Run(ver string, args []string) int {
 	}
 
 	challenge := false
+	block := false
 	naive := false
 	debug := false
 	debugFull := false
@@ -88,6 +91,8 @@ func Run(ver string, args []string) int {
 			return 0
 		case a == "-c" || a == "--challenge":
 			challenge = true
+		case a == "-b" || a == "--block":
+			block = true
 		case a == "-n" || a == "--naive":
 			naive = true
 		case a == "-d" || a == "--debug":
@@ -121,10 +126,17 @@ func Run(ver string, args []string) int {
 		fmt.Fprintln(os.Stderr, "antibot: --naive and --profile are mutually exclusive")
 		return 2
 	}
+	if challenge && block {
+		fmt.Fprintln(os.Stderr, "antibot: --challenge and --block are mutually exclusive")
+		return 2
+	}
 
 	regexText := embeddedRegex
-	if challenge {
+	switch {
+	case challenge:
 		regexText = embeddedChallengeRegex
+	case block:
+		regexText = embeddedBlockRegex
 	}
 	// -D implies -d; the level is "show anything" plus "show the bulky sections".
 	debug = debug || debugFull

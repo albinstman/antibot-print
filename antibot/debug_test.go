@@ -74,15 +74,15 @@ func TestWriteDebugLight(t *testing.T) {
 	}
 }
 
-// TestWriteDebugTier checks the report always shows both tiers — presence and
-// challenge — regardless of -c.
+// TestWriteDebugTier checks the report always shows every tier — presence,
+// challenge and block — regardless of -c/-b.
 func TestWriteDebugTier(t *testing.T) {
 	raw := "HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html>blocked</html>"
 	var buf bytes.Buffer
 	writeDebug(&buf, []byte(raw), debugContext{fromStdin: true}, false)
 
 	out := buf.String()
-	for _, want := range []string{"detection (presence):", "detection (challenge):"} {
+	for _, want := range []string{"detection (presence):", "detection (challenge):", "detection (block):"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("debug output missing %q, got:\n%s", want, out)
 		}

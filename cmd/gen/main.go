@@ -1,11 +1,12 @@
 // Command gen compiles signatures/ into the embedded RE2 artifacts
-// (antibot/antibot.re2.txt and antibot/antibot-challenge.re2.txt). It has no
-// //go:embed in its import graph, so it builds and runs on a clean checkout — where
-// those generated files do not yet exist — to produce them. Run from the repo root:
+// (antibot/antibot.re2.txt, antibot/antibot-challenge.re2.txt and
+// antibot/antibot-block.re2.txt). It has no //go:embed in its import graph, so it
+// builds and runs on a clean checkout — where those generated files do not yet
+// exist — to produce them. Run from the repo root:
 //
 //	go run ./cmd/gen
 //
-// Flags mirror the old `antibot compile`: --dir, --out, --challenge-out.
+// Flags mirror the old `antibot compile`: --dir, --out, --challenge-out, --block-out.
 package main
 
 import (
@@ -21,6 +22,7 @@ func run(args []string) int {
 	dir := "signatures"
 	out := "antibot/antibot.re2.txt"
 	chOut := "antibot/antibot-challenge.re2.txt"
+	blOut := "antibot/antibot-block.re2.txt"
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--dir":
@@ -38,22 +40,31 @@ func run(args []string) int {
 			if i < len(args) {
 				chOut = args[i]
 			}
+		case "--block-out":
+			i++
+			if i < len(args) {
+				blOut = args[i]
+			}
 		default:
 			fmt.Fprintf(os.Stderr, "gen: unknown argument %q\n", args[i])
 			return 2
 		}
 	}
-	pattern, err := gen.CompileSignatures(dir, out)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "gen: %v\n", err)
-		return 1
+	tiers := []struct {
+		compile func(dir, outPath string) (string, error)
+		out     string
+	}{
+		{gen.CompileSignatures, out},
+		{gen.CompileChallengeSignatures, chOut},
+		{gen.CompileBlockSignatures, blOut},
 	}
-	fmt.Fprintf(os.Stderr, "gen: wrote %s (%d bytes)\n", out, len(pattern))
-	chPattern, err := gen.CompileChallengeSignatures(dir, chOut)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "gen: %v\n", err)
-		return 1
+	for _, t := range tiers {
+		pattern, err := t.compile(dir, t.out)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "gen: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(os.Stderr, "gen: wrote %s (%d bytes)\n", t.out, len(pattern))
 	}
-	fmt.Fprintf(os.Stderr, "gen: wrote %s (%d bytes)\n", chOut, len(chPattern))
 	return 0
 }

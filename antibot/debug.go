@@ -64,9 +64,10 @@ func detectVerbose(norm string, re *regexp.Regexp) []vendorMatch {
 }
 
 // writeDebug prints the diagnostic for raw to w (stdout in practice, ahead of the
-// vendor slugs detect prints). It always reports both tiers — presence and
-// challenge — regardless of -c, so the diagnostic shows the full picture: which
-// vendors are present and which are actively serving a challenge/block.
+// vendor slugs detect prints). It always reports every tier — presence, challenge
+// and block — regardless of -c/-b, so the diagnostic shows the full picture: which
+// vendors are present, which are actively serving a challenge, and which are
+// serving a hard block.
 //
 // The light report (full == false) is the small, console-friendly half: how the
 // response was fetched, the status and redirect chain, and every vendor matched
@@ -97,10 +98,12 @@ func writeDebug(w io.Writer, raw []byte, ctx debugContext, full bool) {
 		writeRedirectChain(w, hops, ctx)
 	}
 
-	// Report both tiers, independent of -c: presence (every vendor seen) and
-	// challenge (the subset actively challenging/blocking).
+	// Report every tier, independent of -c/-b: presence (every vendor seen),
+	// challenge (the subset actively challenging) and block (the subset serving
+	// a hard block).
 	writeDebugTier(w, "presence", norm, embeddedRegex)
 	writeDebugTier(w, "challenge", norm, embeddedChallengeRegex)
+	writeDebugTier(w, "block", norm, embeddedBlockRegex)
 
 	if !full {
 		// Light report: stop before the raw response, but point at how to get it.

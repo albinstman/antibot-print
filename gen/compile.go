@@ -15,12 +15,14 @@ import (
 )
 
 // Signature is one vendor's source-of-truth file: signatures/<vendor>.json.
-// Challenge is the subset of Signals that indicates an active challenge/block
-// (not mere vendor presence); it compiles into a separate regex artifact.
+// Challenge and Block are subsets of Signals that indicate, beyond mere vendor
+// presence, an active challenge being served and a hard block (denied outright,
+// nothing to solve); each compiles into its own regex artifact.
 type Signature struct {
 	Vendor    string   `json:"vendor"`
 	Signals   []string `json:"signals"`
 	Challenge []string `json:"challenge,omitempty"`
+	Block     []string `json:"block,omitempty"`
 }
 
 var (
@@ -29,36 +31,34 @@ var (
 	sigPrefixes   = []string{"S:", "H:", "B:"}
 )
 
-// CompileSignatures validates dir, builds the regex, verifies it compiles, and
-// (when outPath != "") writes it. Returns the pattern.
+// CompileSignatures validates dir, builds the presence regex (every vendor's full
+// signal set), verifies it compiles, and (when outPath != "") writes it. Returns
+// the pattern.
 func CompileSignatures(dir, outPath string) (string, error) {
-	sigs, err := loadSignatures(dir)
-	if err != nil {
-		return "", err
-	}
-	pattern := buildRegex(sigs)
-	if _, err := regexp.Compile(pattern); err != nil { // the artifact must itself be valid RE2
-		return "", fmt.Errorf("assembled regex is invalid: %w", err)
-	}
-	if outPath != "" {
-		if err := os.WriteFile(outPath, []byte(pattern+"\n"), 0o644); err != nil {
-			return "", err
-		}
-	}
-	return pattern, nil
+	return compileTier(dir, outPath, "presence", func(s Signature) []string { return s.Signals })
 }
 
-// CompileChallengeSignatures is CompileSignatures for the challenge-only tier:
-// it validates dir, builds the challenge-subset regex, verifies it, and (when
-// outPath != "") writes it. Returns the pattern.
+// CompileChallengeSignatures is CompileSignatures for the challenge-only tier.
 func CompileChallengeSignatures(dir, outPath string) (string, error) {
+	return compileTier(dir, outPath, "challenge", func(s Signature) []string { return s.Challenge })
+}
+
+// CompileBlockSignatures is CompileSignatures for the hard-block-only tier.
+func CompileBlockSignatures(dir, outPath string) (string, error) {
+	return compileTier(dir, outPath, "block", func(s Signature) []string { return s.Block })
+}
+
+// compileTier validates dir, assembles the regex over one tier's signal lists
+// (skipping vendors with none — only presence is guaranteed non-empty), verifies
+// it compiles, and (when outPath != "") writes it. Returns the pattern.
+func compileTier(dir, outPath, tier string, pick func(Signature) []string) (string, error) {
 	sigs, err := loadSignatures(dir)
 	if err != nil {
 		return "", err
 	}
-	pattern := buildChallengeRegex(sigs)
+	pattern := buildRegex(sigs, pick)
 	if _, err := regexp.Compile(pattern); err != nil { // the artifact must itself be valid RE2
-		return "", fmt.Errorf("assembled challenge regex is invalid: %w", err)
+		return "", fmt.Errorf("assembled %s regex is invalid: %w", tier, err)
 	}
 	if outPath != "" {
 		if err := os.WriteFile(outPath, []byte(pattern+"\n"), 0o644); err != nil {
@@ -125,15 +125,17 @@ func validateFile(path string) (Signature, error) {
 			return s, fmt.Errorf("%s: signal is not valid RE2: %q: %w", name, sig, err)
 		}
 	}
-	// Every challenge entry must be one of the (already-validated) signals, so the
-	// challenge tier is a strict subset of presence and inherits its validation.
+	// Every challenge/block entry must be one of the (already-validated) signals, so
+	// those tiers are strict subsets of presence and inherit its validation.
 	sigSet := make(map[string]bool, len(s.Signals))
 	for _, sig := range s.Signals {
 		sigSet[sig] = true
 	}
-	for _, sig := range s.Challenge {
-		if !sigSet[sig] {
-			return s, fmt.Errorf("%s: challenge signal %q is not in 'signals' (challenge must be a subset)", name, sig)
+	for tier, list := range map[string][]string{"challenge": s.Challenge, "block": s.Block} {
+		for _, sig := range list {
+			if !sigSet[sig] {
+				return s, fmt.Errorf("%s: %s signal %q is not in 'signals' (%s must be a subset)", name, tier, sig, tier)
+			}
 		}
 	}
 	return s, nil
@@ -163,25 +165,14 @@ func vendorGroup(vendor string, sigs []string) string {
 	return "(?P<" + vendor + ">" + strings.Join(alts, "|") + ")"
 }
 
-// buildRegex assembles the single multiline RE2 pattern over every vendor's full
-// presence signal set.
-func buildRegex(sigs []Signature) string {
-	groups := make([]string, len(sigs))
-	for i, s := range sigs {
-		groups[i] = vendorGroup(s.Vendor, s.Signals)
-	}
-	return "(?m)" + strings.Join(groups, "|")
-}
-
-// buildChallengeRegex assembles the multiline RE2 pattern over only the challenge
-// subset, skipping vendors that declare no challenge signals.
-func buildChallengeRegex(sigs []Signature) string {
+// buildRegex assembles the single multiline RE2 pattern over one tier's signal
+// lists, skipping vendors that declare no signals for it.
+func buildRegex(sigs []Signature, pick func(Signature) []string) string {
 	groups := make([]string, 0, len(sigs))
 	for _, s := range sigs {
-		if len(s.Challenge) == 0 {
-			continue
+		if list := pick(s); len(list) > 0 {
+			groups = append(groups, vendorGroup(s.Vendor, list))
 		}
-		groups = append(groups, vendorGroup(s.Vendor, s.Challenge))
 	}
 	return "(?m)" + strings.Join(groups, "|")
 }

@@ -31,25 +31,44 @@ func TestCompileSignatures(t *testing.T) {
 	}
 }
 
-// TestCompileChallengeSignatures checks the challenge tier compiles to valid RE2 and
-// is a strict subset (every challenge group's vendor also appears in presence).
-func TestCompileChallengeSignatures(t *testing.T) {
+// TestCompileSubsetTiers checks the challenge and block tiers compile to valid RE2
+// and are strict subsets (every group's vendor also appears in presence).
+func TestCompileSubsetTiers(t *testing.T) {
 	presence, err := CompileSignatures(sigDir, "")
 	if err != nil {
 		t.Fatalf("compile presence: %v", err)
 	}
-	challenge, err := CompileChallengeSignatures(sigDir, "")
-	if err != nil {
-		t.Fatalf("compile challenge: %v", err)
-	}
-	if _, err := regexp.Compile(challenge); err != nil {
-		t.Fatalf("assembled challenge pattern is not valid RE2: %v", err)
+	tiers := map[string]func(dir, outPath string) (string, error){
+		"challenge": CompileChallengeSignatures,
+		"block":     CompileBlockSignatures,
 	}
 	groupRe := regexp.MustCompile(`\(\?P<([a-z][a-z0-9_]*)>`)
-	for _, m := range groupRe.FindAllStringSubmatch(challenge, -1) {
-		if !strings.Contains(presence, "(?P<"+m[1]+">") {
-			t.Errorf("challenge vendor %q is not present in the presence tier", m[1])
+	for tier, compile := range tiers {
+		pattern, err := compile(sigDir, "")
+		if err != nil {
+			t.Fatalf("compile %s: %v", tier, err)
 		}
+		if _, err := regexp.Compile(pattern); err != nil {
+			t.Fatalf("assembled %s pattern is not valid RE2: %v", tier, err)
+		}
+		for _, m := range groupRe.FindAllStringSubmatch(pattern, -1) {
+			if !strings.Contains(presence, "(?P<"+m[1]+">") {
+				t.Errorf("%s vendor %q is not present in the presence tier", tier, m[1])
+			}
+		}
+	}
+}
+
+// TestValidateFileRejectsNonSubsetBlock checks a block signal that is not in
+// 'signals' is rejected (block, like challenge, must be a subset of presence).
+func TestValidateFileRejectsNonSubsetBlock(t *testing.T) {
+	dir := t.TempDir()
+	sig := `{"vendor":"acme","signals":["H:x:y"],"block":["H:other:z"]}`
+	if err := os.WriteFile(filepath.Join(dir, "acme.json"), []byte(sig), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := loadSignatures(dir); err == nil {
+		t.Error("expected an error for a block signal outside 'signals', got nil")
 	}
 }
 

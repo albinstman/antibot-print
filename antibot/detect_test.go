@@ -21,6 +21,12 @@ func challengeRegexForTest(t *testing.T) *regexp.Regexp {
 	return regexp.MustCompile(strings.TrimSpace(embeddedChallengeRegex))
 }
 
+// blockRegexForTest compiles the embedded block-only artifact.
+func blockRegexForTest(t *testing.T) *regexp.Regexp {
+	t.Helper()
+	return regexp.MustCompile(strings.TrimSpace(embeddedBlockRegex))
+}
+
 func TestDetect(t *testing.T) {
 	re := regexForTest(t)
 	cases := []struct {
@@ -105,6 +111,49 @@ func TestChallengeDetect(t *testing.T) {
 			"cloudflare challenge",
 			"HTTP/1.1 403\r\ncf-mitigated: challenge\r\n\r\n<html></html>",
 			[]string{"cloudflare"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Detect([]byte(tc.raw), re)
+			if len(got) == 0 && len(tc.want) == 0 {
+				return
+			}
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("Detect() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestBlockDetect checks the block tier reports a vendor only when the response
+// carries a hard-block marker — not on presence, and not on a solvable challenge.
+func TestBlockDetect(t *testing.T) {
+	re := blockRegexForTest(t)
+	cases := []struct {
+		name string
+		raw  string
+		want []string
+	}{
+		{
+			// Akamai's deny reference ID (code 18) survives customer-branded,
+			// localized deny pages — here the Swedish label seen on adidas.se.
+			"akamai hard block (localized custom page)",
+			"HTTP/2.0 403 Forbidden\r\nServer: AkamaiNetStorage\r\n\r\n" +
+				"<html><span>Referensfel: 18.d09c9bd5.1781276226.e9310d3</span></html>",
+			[]string{"akamai"},
+		},
+		{
+			// _abck cookie alone = presence, not a block.
+			"akamai presence only (negative)",
+			"HTTP/1.1 200 OK\r\nSet-Cookie: _abck=1; path=/\r\n\r\n<html>content</html>",
+			[]string{},
+		},
+		{
+			// A solvable challenge interstitial = challenge tier, not a block.
+			"akamai challenge only (negative)",
+			"HTTP/1.1 200 OK\r\n\r\n<html><div id=\"sec-if-cpt-container\"></div></html>",
+			[]string{},
 		},
 	}
 	for _, tc := range cases {

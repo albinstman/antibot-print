@@ -36,12 +36,19 @@ $ curl -isS https://example.com | antibot
 cloudflare
 ```
 
-Add `-c` to report only vendors actively serving a challenge or block, not mere
-presence:
+Add `-c` to report only vendors actively serving a challenge, not mere presence:
 
 ```console
 $ antibot -c https://example.com
 cloudflare
+```
+
+Add `-b` to report only vendors serving a hard block (denied outright, nothing to
+solve):
+
+```console
+$ antibot -b https://example.com
+akamai
 ```
 
 Add `-n` to fetch with Go's default fingerprint. Surfaces
@@ -75,6 +82,8 @@ detection (presence):
   cloudflare
     ← H:set-cookie:__cf_bm=
 detection (challenge):
+  (none)
+detection (block):
   (none)
 ```
 
@@ -117,7 +126,7 @@ that teaches a coding agent (e.g. Claude Code) to use `antibot`. To install it, 
 ## Project structure
 
 ```
-signatures/<vendor>.json       source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset]}
+signatures/<vendor>.json       source of truth: {vendor, signals:[RE2], challenge?:[RE2 subset], block?:[RE2 subset]}
 
 cmd/cli/main.go                CLI entrypoint (package main): forwards to package antibot
 cmd/gen/main.go                generator entrypoint (package main): forwards to package gen
@@ -133,6 +142,7 @@ antibot/                       package antibot — the CLI library
   *_test.go                    detect / fetch / debug / update tests
   antibot.re2.txt              GENERATED, gitignored — compiled presence regex (embedded)
   antibot-challenge.re2.txt    GENERATED, gitignored — compiled challenge-only regex (embedded)
+  antibot-block.re2.txt        GENERATED, gitignored — compiled block-only regex (embedded)
 
 gen/                           package gen — compiles signatures/ into the .re2.txt (no embed)
   compile.go                   load/validate signatures, assemble the RE2 artifacts

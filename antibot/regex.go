@@ -12,3 +12,6 @@ var embeddedRegex string
 
 //go:embed antibot-challenge.re2.txt
 var embeddedChallengeRegex string
+
+//go:embed antibot-block.re2.txt
+var embeddedBlockRegex string

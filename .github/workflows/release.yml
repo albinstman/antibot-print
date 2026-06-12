@@ -44,7 +44,7 @@ jobs:
           done
           # Ship the compiled regex alongside the binaries so standalone/library users
           # can grab the current artifacts (they are not committed to the repo).
-          cp antibot/antibot.re2.txt antibot/antibot-challenge.re2.txt dist/
+          cp antibot/antibot.re2.txt antibot/antibot-challenge.re2.txt antibot/antibot-block.re2.txt dist/
           printf '%s' "$VERSION" > dist/VERSION   # tiny asset the update-checker polls
           ( cd dist && sha256sum * > SHA256SUMS )
           ls -l dist
